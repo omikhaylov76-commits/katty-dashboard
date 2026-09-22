@@ -171,7 +171,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
       <div class="acc-body"><div id="positions"></div></div></details>
     <details class="acc" open><summary>Ордера на бирже <span class="cnt" id="nord">0</span><span class="chev">⌄</span></summary>
       <div class="acc-body"><div id="orders"></div></div></details>
-    <details class="acc"><summary>Закрытые сделки <span class="cnt" id="ncl">0</span><span class="chev">⌄</span></summary>
+    <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl">0</span><span class="chev">⌄</span></summary>
       <div class="acc-body"><div id="closed"></div></div></details>
   </div>
   </div>
@@ -256,7 +256,7 @@ function render(){
     const pct=(x)=>(lo&&hi&&hi>lo)?Math.max(0,Math.min(100,100*(x-lo)/(hi-lo))):50;
     const upct=p.entry?100*(long?1:-1)*(p.mark-p.entry)/p.entry:0;
     return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between">
-      <div class="l"><span class="sym">${p.sym}</span><span class="badge ${long?'b-long':'b-short'}">${long?'long':'short'}</span><span class="badge b-mut">${p.lev}x</span>
+      <div class="l"><span class="sym">${p.sym}</span><span class="badge ${long?'b-long':'b-short'}">${long?'long':'short'}</span><span class="badge b-mut">${p.lev}x</span>${p.legacy?'<span class="badge b-amb">старое</span>':''}
         <div class="meta mono">${fmt(p.qty,3)} · вход ${fmt(p.entry,4)} · марк ${fmt(p.mark,4)}</div></div>
       <div class="r mono">${pnl(p.upnl)}<div class="meta">${pnl(upct,2)}%</div></div></div>
       <div class="track"><span class="en" style="left:${pct(p.entry)}%"></span><span class="pin" style="left:${pct(p.mark)}%"></span></div>
@@ -264,12 +264,12 @@ function render(){
   }).join(''):'<div class="empty">Позиций нет</div>';
   $('#nord').textContent=a.orders.length;
   $('#orders').innerHTML=a.orders.length?a.orders.map(o=>`<div class="row"><div class="l"><span class="sym">${o.sym}</span>
-    <span class="badge ${o.side==='Buy'?'b-long':'b-short'}">${o.side==='Buy'?'buy':'sell'}</span><span class="badge b-mut">${o.type}${o.reduce?' · close':''}</span>
+    <span class="badge ${o.side==='Buy'?'b-long':'b-short'}">${o.side==='Buy'?'buy':'sell'}</span><span class="badge b-mut">${o.type}${o.reduce?' · close':''}</span>${o.legacy?'<span class="badge b-amb">старое</span>':''}
     <div class="meta mono">${fmt(o.qty,3)} @ ${o.price?fmt(o.price,4):'trig '+fmt(o.trigger,4)}${o.sl?' · SL '+fmt(o.sl,4):''}${o.tp?' · TP '+fmt(o.tp,4):''}</div></div>
     <div class="r"><span class="badge b-acc">${o.status}</span><div class="meta">${tstr(o.created)}</div></div></div>`).join(''):'<div class="empty">Ордеров нет</div>';
   $('#ncl').textContent=cl.length;
   $('#closed').innerHTML=cl.length?cl.slice(0,30).map(c=>`<div class="row"><div class="l"><span class="sym">${c.sym}</span><span class="badge ${c.side==='Sell'?'b-long':'b-short'}">${c.side==='Sell'?'long':'short'}</span>
-    <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)} · ${fmt(c.qty,3)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.t)}</div></div></div>`).join(''):'<div class="empty">Закрытых сделок ещё нет</div>';
+    <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)} · ${fmt(c.qty,3)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.t)}</div></div></div>`).join(''):'<div class="empty">Сделок пока нет — история прежних ботов скрыта</div>';
   // lab
   $('#exps').innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${e.id||e.file}</span><span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${e.mode||'?'}</span></div>
     <div class="hy">${e.hypothesis||''}</div><div class="pm mono">${e.strategy||''} · ${(e.symbols||[]).join(', ')} · ${e.start||''} → ${e.end||''}</div></div>`).join(''):'<div class="empty">Экспериментов пока нет — конвейер строится</div>';
