@@ -123,6 +123,32 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .dots{display:flex;justify-content:center;gap:6px;margin:4px 0 10px}
 .dots i{width:6px;height:6px;border-radius:3px;background:var(--border2);transition:all .35s var(--spring)}
 .dots i.on{width:18px;background:var(--accent2)}
+.strat{border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;transition:border-color .4s}
+.strat[open]{border-color:color-mix(in srgb,var(--c,var(--accent)) 55%,var(--border))}
+.strat>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;min-height:56px}
+.strat>summary::-webkit-details-marker{display:none}
+.strat .sdot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent));flex-shrink:0;box-shadow:0 0 0 4px color-mix(in srgb,var(--c,var(--accent)) 18%,transparent)}
+.strat .sttl{font-weight:var(--fw-s);font-size:var(--fs-h2)}
+.strat .stag{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;line-height:1.35}
+.strat .schev{margin-left:auto;color:var(--muted);transition:transform .5s var(--spring);font-size:18px;flex-shrink:0}
+.strat[open] .schev{transform:rotate(180deg)}
+.strat>.sbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .7s cubic-bezier(.22,1,.36,1)}
+.strat[open]>.sbody{grid-template-rows:1fr}
+.sbody>.sin{overflow:hidden;opacity:0;transform:translateY(-6px);transition:opacity .5s .15s,transform .6s .15s var(--spring)}
+.strat[open] .sbody>.sin{opacity:1;transform:none}
+.sin{padding:0 16px 16px}
+.sblock{margin-top:14px}
+.sblock h4{margin:0 0 5px;font-size:10px;font-weight:var(--fw-b);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps)}
+.sblock p{margin:0;font-size:var(--fs-sm);line-height:1.5;color:var(--text)}
+.sblock.quiet p{color:var(--muted)}
+.snums{display:grid;gap:1px;background:var(--border);border-radius:var(--r-sm);overflow:hidden;margin-top:6px}
+.snums div{display:flex;justify-content:space-between;gap:10px;background:var(--surface2);padding:8px 11px;font-size:var(--fs-sm)}
+.snums span:first-child{color:var(--muted)}
+.snums span:last-child{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;font-weight:var(--fw-m)}
+.srun{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.srun .rchip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:5px 10px;font-size:var(--fs-xs)}
+.srun .rchip b{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:var(--fw-s)}
+.supd{font-size:10px;color:var(--faint);margin-top:12px;text-align:right}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -177,6 +203,11 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
   </div>
   <div class="dots" id="dots"></div>
   <div class="caro" id="caro"></div>
+
+  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
+    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="strategies"></div>
+  </div>
 </section>
 
 <section data-page="lab">
@@ -271,8 +302,33 @@ function render(){
   $('#closed').innerHTML=cl.length?cl.slice(0,30).map(c=>`<div class="row"><div class="l"><span class="sym">${c.sym}</span><span class="badge ${c.side==='Sell'?'b-long':'b-short'}">${c.side==='Sell'?'long':'short'}</span>
     <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)} · ${fmt(c.qty,3)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.t)}</div></div></div>`).join(''):'<div class="empty">Сделок пока нет — история прежних ботов скрыта</div>';
   // lab
-  $('#exps').innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${e.id||e.file}</span><span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${e.mode||'?'}</span></div>
+  $('#exps').innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${e.id||e.file}</span><span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${e.mode||'?'}</span>${e.live?'<span class="badge b-long">идёт</span>':'<span class="badge b-mut">остановлен</span>'}</div>
     <div class="hy">${e.hypothesis||''}</div><div class="pm mono">${e.strategy||''} · ${(e.symbols||[]).join(', ')} · ${e.start||''} → ${e.end||''}</div></div>`).join(''):'<div class="empty">Экспериментов пока нет — конвейер строится</div>';
+  // стратегии — описание текущей логики
+  const stColor={'основная':'var(--accent)','наблюдение':'var(--amber)','контроль':'var(--faint)'};
+  const esc=x=>String(x==null?'':x).replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');
+  $('#strategies').innerHTML=(s.strategies||[]).map(x=>{
+    const run=x.running||[]; const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
+    const blk=(t,v,q)=>v?`<div class="sblock ${q?'quiet':''}"><h4>${t}</h4><p>${esc(v)}</p></div>`:'';
+    return `<details class="strat" style="--c:${c}">
+      <summary><span class="sdot"></span><span><span class="sttl">${esc(x.title||x.name)}</span>
+        ${run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>'}
+        <div class="stag">${esc(x.tagline||'')}</div></span><span class="schev">⌄</span></summary>
+      <div class="sbody"><div class="sin">
+        ${run.length?`<div class="sblock"><h4>Запущено сейчас</h4><div class="srun">${run.map(r=>
+          `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · счёт ${esc(r.account)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
+        ${blk('Идея',x.idea)}
+        ${blk('Как вхожу',x.entry)}
+        ${blk('Как выхожу',x.exit)}
+        ${blk('Почему стоп именно такой',x.stop_logic)}
+        ${(x.numbers&&x.numbers.length)?`<div class="sblock"><h4>Проверка на истории</h4><div class="snums">${
+          x.numbers.map(n=>`<div><span>${esc(n[0])}</span><span>${esc(n[1])}</span></div>`).join('')}</div></div>`:''}
+        ${blk('Где риск',x.risk)}
+        ${blk('Почему это работает',x.why_it_works,true)}
+        <div class="supd">описание обновлено ${esc(x.updated||'')}</div>
+      </div></div></details>`;
+  }).join('')||'<div class="empty">Описаний пока нет</div>';
+  $('#stratupd').textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
   $('#scants').textContent=s.scanner_ts?tstr(new Date(s.scanner_ts).getTime()):'';
   $('#scanner').innerHTML=s.scanner.length?s.scanner.map(x=>`<div class="row"><div class="l"><span class="sym">${x.sym.replace('USDT','')}</span><div class="meta mono">оборот ${fmt(x.turnover_m,1)}M · funding ${fmt(x.funding,3)}%</div></div>
     <div class="r mono">${pnl(x.chg24,1)}%${x.chg24>=30?'<span class="badge b-amb">памп</span>':''}</div></div>`).join(''):'<div class="empty">Сканер ещё не запускался</div>';
