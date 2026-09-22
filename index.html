@@ -101,6 +101,24 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .expcard .h{display:flex;justify-content:space-between;align-items:center}
 .expcard .hy{font-size:var(--fs-sm);color:var(--muted);margin-top:4px}
 .expcard .pm{font-size:var(--fs-xs);color:var(--faint);margin-top:4px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:8px 14px;font:inherit;font-size:var(--fs-sm);font-weight:var(--fw-s);color:var(--text);cursor:pointer;transition:transform .25s var(--spring);min-height:44px}
+.pill:active{transform:scale(.96)}
+.pill .pr{color:var(--muted);font-weight:var(--fw-r)}
+.pill .ch{color:var(--muted);transition:transform .35s var(--spring)}
+.pillwrap{display:flex;justify-content:center;margin-bottom:12px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s}
+.ov.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--surface);border-top:1px solid var(--border2);border-radius:22px 22px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;transform:translateY(105%);transition:transform .5s var(--spring)}
+.sheet.on{transform:none}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 12px}
+.sheet h3{margin:0 0 8px;font-size:var(--fs-h2);font-weight:var(--fw-s)}
+.acct{display:flex;align-items:center;gap:12px;padding:12px 8px;border-radius:var(--r-sm);cursor:pointer;min-height:56px;transition:background .2s,transform .25s var(--spring)}
+.acct:active{transform:scale(.98)}.acct.on{background:var(--surface2)}
+.acct .av{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-weight:var(--fw-b);color:#fff;font-size:15px;flex-shrink:0}
+.acct .nm{font-weight:var(--fw-s)}.acct .rl{font-size:var(--fs-xs);color:var(--muted)}
+.acct .eqv{margin-left:auto;text-align:right}
+.locked{filter:blur(5px);pointer-events:none;user-select:none;opacity:.6}
+.lockmsg{text-align:center;color:var(--muted);font-size:var(--fs-sm);padding:14px 0 4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -115,6 +133,9 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 <div id="errbox" class="err" style="display:none"></div>
 
 <section data-page="home" class="on">
+  <div class="pillwrap"><button class="pill" id="pill" aria-haspopup="dialog"><span class="av" id="pillav" style="width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff"></span><span id="pillname">—</span><span class="pr" id="pillrole"></span><span class="ch">⌄</span></button></div>
+  <div id="lockmsg" class="lockmsg" style="display:none">Ждёт API-ключи</div>
+  <div id="acctbody">
   <div class="card hero">
     <h2>Демо-счёт Bybit <span id="upd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
     <div class="eq mono" id="equity">—</div>
@@ -150,6 +171,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
     <details class="acc"><summary>Закрытые сделки <span class="cnt" id="ncl">0</span><span class="chev">⌄</span></summary>
       <div class="acc-body"><div id="closed"></div></div></details>
   </div>
+  </div>
 </section>
 
 <section data-page="lab">
@@ -162,6 +184,8 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 </section>
 </main>
 
+<div class="ov" id="ov"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Выбор счёта"><div class="grab"></div><h3>Счета</h3><div id="acctlist"></div></div>
 <nav class="tabbar"><div class="in">
   <a href="#home" class="on" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Счёт</a>
   <a href="#lab" data-nav="lab"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4 20h16l-6-11V3"/></svg>Лаборатория</a>
@@ -175,8 +199,9 @@ const sgn=v=>v>0?'pos':v<0?'neg':'zero';
 const pnl=(v,d=2)=>`<span class="${sgn(v)}">${v>0?'+':''}${fmt(v,d)}</span>`;
 const tstr=ms=>new Date(ms).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const kyivDay=ms=>new Date(ms).toLocaleDateString('sv-SE',{timeZone:'Europe/Kiev'});
-const START=998.11; // стартовый капитал демо
-let ST=null, period=1;
+let ST=null, period=1, cur=+(localStorage.getItem('acct')||0);
+const COLORS=['#7132F5','#e3a63b','#2fbf8f'];
+const A=()=>ST.accounts[cur];
 
 async function load(){
   try{
@@ -187,25 +212,33 @@ async function load(){
 
 function render(){
   const s=ST;
-  $('#errbox').style.display=s.errors.length?'block':'none'; $('#errbox').textContent=s.errors.join(' · ');
+  $('#errbox').style.display='none';
   $('#killbar').style.display=s.kill?'block':'none';
   $('#botdot').className='dot '+(s.bot_alive?'on':'off'); $('#bottxt').textContent=s.bot_alive?'бот жив':'бот не запущен';
   const age=Math.round((Date.now()-new Date(s.ts))/60000); $('#upd').textContent=new Date(s.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+(age>1?' · '+age+' мин назад':'');
-  $('#equity').textContent=fmt(s.equity)+' USDT';
-  $('#avail').textContent=fmt(s.available); $('#upl').innerHTML=pnl(s.unrealised);
+  // account switcher
+  const a=A(); const START=a.start||a.equity||1;
+  $('#pillav').textContent=a.slot; $('#pillav').style.background=COLORS[cur]; $('#pillname').textContent=a.name; $('#pillrole').textContent='· '+a.role;
+  $('#acctlist').innerHTML=s.accounts.map((x,i)=>`<div class="acct ${i===cur?'on':''}" data-i="${i}" role="button" tabindex="0"><div class="av" style="background:${COLORS[i]}">${x.slot}</div>
+    <div><div class="nm">${x.name}</div><div class="rl">${x.role}${x.connected?'':' · нет ключей'}</div></div>
+    <div class="eqv mono">${x.connected?fmt(x.equity)+'<div class="meta">'+(x.start?pnl(100*(x.equity-x.start)/x.start,2)+'%':'')+'</div>':'<span class="badge b-mut">ждёт</span>'}</div></div>`).join('');
+  $('#lockmsg').style.display=a.connected?'none':'block'; $('#acctbody').classList.toggle('locked',!a.connected);
+  if(a.errors.length){$('#errbox').style.display='block';$('#errbox').textContent=a.errors.join(' · ')}
+  $('#equity').textContent=fmt(a.equity)+' USDT';
+  $('#avail').textContent=fmt(a.available); $('#upl').innerHTML=pnl(a.unrealised);
   const today=kyivDay(Date.now());
-  const dt=(s.daily_pnl.find(x=>x.d===today)||{pnl:0}).pnl;
-  const d30=s.daily_pnl.reduce((a,x)=>a+x.pnl,0);
+  const dt=(a.daily_pnl.find(x=>x.d===today)||{pnl:0}).pnl;
+  const d30=a.daily_pnl.reduce((a,x)=>a+x.pnl,0);
   $('#t-today').innerHTML=pnl(dt); $('#t-30').innerHTML=pnl(d30);
-  const goal=START*1.05; $('#t-goal').innerHTML=pnl(s.equity-goal)+`<span class="meta" style="display:block">цель ${fmt(goal,0)}</span>`;
-  const cl=s.closed; const w=cl.filter(c=>c.pnl>0), l=cl.filter(c=>c.pnl<=0);
+  const goal=START*1.05; $('#t-goal').innerHTML=pnl(a.equity-goal)+`<span class="meta" style="display:block">цель ${fmt(goal,0)}</span>`;
+  const cl=a.closed; const w=cl.filter(c=>c.pnl>0), l=cl.filter(c=>c.pnl<=0);
   $('#t-n').textContent=cl.length; $('#t-wr').textContent=cl.length?fmt(100*w.length/cl.length,0)+'%':'—';
   const gp=w.reduce((a,c)=>a+c.pnl,0), gl=-l.reduce((a,c)=>a+c.pnl,0);
   $('#t-pf').textContent=cl.length?(gl>0?fmt(gp/gl,2):'∞'):'—';
   drawEq(); drawBars();
   // positions
-  $('#npos').textContent=s.positions.length;
-  $('#positions').innerHTML=s.positions.length?s.positions.map(p=>{
+  $('#npos').textContent=a.positions.length;
+  $('#positions').innerHTML=a.positions.length?a.positions.map(p=>{
     const long=p.side==='Buy'; const lo=long?p.sl:p.tp, hi=long?p.tp:p.sl;
     const pct=(x)=>(lo&&hi&&hi>lo)?Math.max(0,Math.min(100,100*(x-lo)/(hi-lo))):50;
     const upct=p.entry?100*(long?1:-1)*(p.mark-p.entry)/p.entry:0;
@@ -216,8 +249,8 @@ function render(){
       <div class="track"><span class="en" style="left:${pct(p.entry)}%"></span><span class="pin" style="left:${pct(p.mark)}%"></span></div>
       <div class="tlabels mono"><span>SL ${p.sl?fmt(p.sl,4):'—'}</span><span>TP ${p.tp?fmt(p.tp,4):'—'}</span></div></div>`;
   }).join(''):'<div class="empty">Позиций нет</div>';
-  $('#nord').textContent=s.orders.length;
-  $('#orders').innerHTML=s.orders.length?s.orders.map(o=>`<div class="row"><div class="l"><span class="sym">${o.sym}</span>
+  $('#nord').textContent=a.orders.length;
+  $('#orders').innerHTML=a.orders.length?a.orders.map(o=>`<div class="row"><div class="l"><span class="sym">${o.sym}</span>
     <span class="badge ${o.side==='Buy'?'b-long':'b-short'}">${o.side==='Buy'?'buy':'sell'}</span><span class="badge b-mut">${o.type}${o.reduce?' · close':''}</span>
     <div class="meta mono">${fmt(o.qty,3)} @ ${o.price?fmt(o.price,4):'trig '+fmt(o.trigger,4)}${o.sl?' · SL '+fmt(o.sl,4):''}${o.tp?' · TP '+fmt(o.tp,4):''}</div></div>
     <div class="r"><span class="badge b-acc">${o.status}</span><div class="meta">${tstr(o.created)}</div></div></div>`).join(''):'<div class="empty">Ордеров нет</div>';
@@ -238,8 +271,8 @@ function prep(cv){const dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeig
 let eqPts=[];
 function drawEq(){
   const cv=$('#eqc'); const [c,w,h]=prep(cv); c.clearRect(0,0,w,h);
-  const now=Date.now()/1000; let ser=ST.equity_series.filter(p=>p.t>now-period*86400);
-  if(ser.length<2){ser=ST.equity_series.slice(-2)}; if(ser.length<2){ser=[{t:now-3600,v:ST.equity},{t:now,v:ST.equity}]}
+  const now=Date.now()/1000; const a=A(),START=a.start||a.equity||1; let ser=a.equity_series.filter(p=>p.t>now-period*86400);
+  if(ser.length<2){ser=a.equity_series.slice(-2)}; if(ser.length<2){ser=[{t:now-3600,v:a.equity},{t:now,v:a.equity}]}
   const xs=ser.map(p=>p.t), ys=ser.map(p=>p.v); const x0=Math.min(...xs),x1=Math.max(...xs); let y0=Math.min(...ys),y1=Math.max(...ys);
   if(y1-y0<1){const m=(y0+y1)/2;y0=m-.5;y1=m+.5}; const pad=8;
   const X=t=>pad+(w-2*pad)*(t-x0)/Math.max(1,x1-x0), Y=v=>h-pad-(h-2*pad-10)*(v-y0)/(y1-y0);
@@ -267,12 +300,17 @@ $('#ptabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!
 
 // ---- daily bars ----
 function drawBars(){
-  const days=[]; for(let i=13;i>=0;i--){const d=kyivDay(Date.now()-i*86400000);days.push({d,pnl:(ST.daily_pnl.find(x=>x.d===d)||{pnl:0}).pnl})}
+  const days=[]; for(let i=13;i>=0;i--){const d=kyivDay(Date.now()-i*86400000);days.push({d,pnl:(A().daily_pnl.find(x=>x.d===d)||{pnl:0}).pnl})}
   const mx=Math.max(0.01,...days.map(x=>Math.abs(x.pnl))); const sum=days.reduce((a,x)=>a+x.pnl,0); $('#dsum').innerHTML=pnl(sum)+' за 14д';
   $('#dbars').innerHTML=`<div class="bars diverge">${days.map((x,i)=>{const hgt=Math.max(2,55*Math.abs(x.pnl)/mx);const left=`left:calc(${i}*(100%/14) + 1.5px);width:calc(100%/14 - 3px)`;return x.pnl>=0?`<div class="bar p" style="${left};height:${x.pnl?hgt:1}px" title="${x.d}: ${fmt(x.pnl)}"></div>`:`<div class="bar n" style="${left};height:${hgt}px" title="${x.d}: ${fmt(x.pnl)}"></div>`}).join('')}</div>
   <div class="blabels mono">${days.map(x=>`<span>${x.d.slice(8)}</span>`).join('')}</div>`;
 }
 
+// ---- account sheet ----
+const openSheet=o=>{$('#ov').classList.toggle('on',o);$('#sheet').classList.toggle('on',o);$('#pill').querySelector('.ch').style.transform=o?'rotate(180deg)':''};
+$('#pill').addEventListener('click',()=>openSheet(true)); $('#ov').addEventListener('click',()=>openSheet(false));
+$('#acctlist').addEventListener('click',e=>{const el=e.target.closest('.acct');if(!el)return;cur=+el.dataset.i;localStorage.setItem('acct',cur);openSheet(false);$('#acctbody').style.animation='none';void $('#acctbody').offsetWidth;$('#acctbody').style.animation='in .4s var(--spring)';render()});
+$('#acctlist').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.click()}});
 // ---- nav ----
 function nav(){const p=(location.hash||'#home').slice(1);document.querySelectorAll('section[data-page]').forEach(s=>s.classList.toggle('on',s.dataset.page===p));document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===p));if(p==='home'&&ST)drawEq()}
 addEventListener('hashchange',nav); nav();
