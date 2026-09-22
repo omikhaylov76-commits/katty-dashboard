@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0b10">
 <title>Кэтти · Trading Lab</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Кэтти">
+<meta name="description" content="Торговая лаборатория: счета, позиции, ордера, стратегии">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -94,6 +102,10 @@ nav.tabbar a.on{color:var(--accent2)}
 nav.tabbar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 section[data-page]{display:none}section[data-page].on{display:block;animation:in .35s var(--spring)}
 @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.offline{background:color-mix(in srgb,var(--amber) 14%,transparent);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);color:var(--amber);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-xs);margin-bottom:12px;text-align:center}
+.a2hs{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-size:var(--fs-sm);display:flex;gap:10px;align-items:flex-start}
+.a2hs b{font-weight:var(--fw-s)}
+.a2hs button{margin-left:auto;background:none;border:0;color:var(--muted);font:inherit;font-size:18px;cursor:pointer;padding:0 4px;line-height:1}
 .err{background:color-mix(in srgb,var(--red) 12%,transparent);border:1px solid color-mix(in srgb,var(--red) 40%,transparent);color:var(--red);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-xs);margin-bottom:12px}
 .kill{background:var(--red);color:#fff;text-align:center;padding:8px;border-radius:var(--r-sm);font-weight:var(--fw-b);margin-bottom:12px;letter-spacing:.06em}
 .expcard{border-top:1px solid var(--border);padding:10px 0}
@@ -161,7 +173,8 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 </div></header>
 
 <main>
-<div id="killbar" class="kill" style="display:none">KILL — торговля остановлена</div>
+<div id="offbar" class="offline" style="display:none">Нет сети — показаны последние загруженные данные</div>
+  <div id="killbar" class="kill" style="display:none">KILL — торговля остановлена</div>
 <div id="errbox" class="err" style="display:none"></div>
 
 <section data-page="home" class="on">
@@ -243,7 +256,8 @@ async function load(){
   try{
     const src=location.hostname.endsWith('github.io')||location.protocol==='file:'?'state.json?'+Date.now():'/api/state';
     const r=await fetch(src,{cache:'no-store'}); ST=await r.json(); render();
-  }catch(e){ $('#errbox').style.display='block'; $('#errbox').textContent='Сервер дашборда недоступен: '+e; }
+    showOff(false);
+  }catch(e){ if(!navigator.onLine){showOff(true);} else {$('#errbox').style.display='block'; $('#errbox').textContent='Сервер дашборда недоступен: '+e;} }
 }
 
 function render(){
@@ -399,6 +413,25 @@ let scrollT; $('#caro').addEventListener('scroll',()=>{clearTimeout(scrollT);scr
 function nav(){const p=(location.hash||'#home').slice(1);document.querySelectorAll('section[data-page]').forEach(s=>s.classList.toggle('on',s.dataset.page===p));document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===p));if(p==='home'&&ST)drawEq()}
 addEventListener('hashchange',nav); nav();
 addEventListener('resize',()=>{if(ST){drawEq();ST.accounts.forEach((x,i)=>spark($('#sp'+i),x.equity_series,x.start,COLORS[i]))}});
+// --- PWA ---
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+const showOff=o=>{const b=$('#offbar'); if(b) b.style.display=o?'block':'none'};
+addEventListener('online',()=>{showOff(false);load()});
+addEventListener('offline',()=>showOff(true));
+showOff(!navigator.onLine);
+// подсказка «добавить на главный экран» для iOS Safari (одноразовая)
+(function(){
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  if(ios&&!standalone&&!localStorage.getItem('a2hs_hidden')){
+    const el=document.createElement('div'); el.className='a2hs';
+    el.innerHTML='<span>📲</span><span>Чтобы открыть как приложение: нажми <b>Поделиться</b> → <b>На экран «Домой»</b></span><button aria-label="Скрыть">×</button>';
+    el.querySelector('button').onclick=()=>{localStorage.setItem('a2hs_hidden','1');el.remove()};
+    const m=document.querySelector('main'); m.insertBefore(el,m.firstChild);
+  }
+})();
 load(); setInterval(load,15000);
 </script>
 </body>
