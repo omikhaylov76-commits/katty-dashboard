@@ -43,6 +43,22 @@ main{max-width:480px;margin:0 auto;width:100%;padding:calc(var(--hdr) + env(safe
 .card h2{margin:0 0 12px;font-size:var(--fs-xs);font-weight:var(--fw-s);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps);display:flex;justify-content:space-between;align-items:center}
 .hero .eq{font-size:var(--fs-display);font-weight:var(--fw-s);letter-spacing:-.02em;line-height:1.1}
 .hero .sub{display:flex;gap:14px;margin-top:8px;font-size:var(--fs-sm);color:var(--muted);flex-wrap:wrap}
+.livepnl{margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);transition:background .5s,border-color .5s}
+.livepnl.on{background:color-mix(in srgb,var(--lc,var(--muted)) 7%,var(--surface2));border-color:color-mix(in srgb,var(--lc,var(--muted)) 28%,var(--border))}
+.livepnl.pos{--lc:var(--green)}.livepnl.neg{--lc:var(--red)}
+.lp-head{display:flex;align-items:center;gap:8px;font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps)}
+.lp-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex-shrink:0}
+.livepnl.on .lp-dot{background:var(--lc);animation:lpulse 1.8s ease-in-out infinite}
+@keyframes lpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--lc) 55%,transparent)}70%{box-shadow:0 0 0 7px transparent}}
+.lp-val{display:flex;align-items:baseline;gap:7px;font-size:var(--fs-mono-sm);font-weight:var(--fw-s);color:var(--muted);margin-top:6px;line-height:1.1;letter-spacing:-.01em;transition:font-size .45s var(--spring),color .4s}
+.livepnl.on .lp-val{font-size:30px;color:var(--lc)}
+.lp-val small{font-size:var(--fs-sm);color:var(--muted);font-weight:var(--fw-r);letter-spacing:0}
+.lp-sub{font-size:var(--fs-sm);color:var(--muted);margin-top:7px;display:none;line-height:1.45}
+.lp-sub .mono{color:var(--text)}
+.lp-sub .pc{opacity:.85}
+.livepnl.on .lp-sub{display:block}
+.lp-val.flash{animation:lflash .6s var(--spring)}
+@keyframes lflash{0%{transform:scale(1)}35%{transform:scale(1.06)}100%{transform:scale(1)}}
 .pos{color:var(--green)}.neg{color:var(--red)}.zero{color:var(--muted)}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .tile{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px}
@@ -185,7 +201,11 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
     <div class="eq mono" id="equity">—</div>
     <div class="sub">
       <span>Свободно <b class="mono" id="avail">—</b></span>
-      <span>Нереализ. <b class="mono" id="upl">—</b></span>
+    </div>
+    <div class="livepnl" id="livepnl">
+      <div class="lp-head"><span class="lp-dot"></span><span id="lp-label">Открытых позиций нет</span></div>
+      <div class="lp-val mono" id="upl">—</div>
+      <div class="lp-sub" id="lp-sub"></div>
     </div>
     <div class="tiles">
       <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today">—</div></div>
@@ -285,7 +305,20 @@ function render(){
   $('#lockmsg').style.display='none'; $('#acctbody').classList.toggle('locked',!a.connected);
   if(a.errors.length){$('#errbox').style.display='block';$('#errbox').textContent=a.errors.join(' · ')}
   $('#equity').textContent=fmt(a.equity)+' USDT';
-  $('#avail').textContent=fmt(a.available); $('#upl').innerHTML=pnl(a.unrealised);
+  $('#avail').textContent=fmt(a.available);
+  // живая прибыль — крупно, пока позиция в работе
+  const up=a.unrealised, np=a.positions.length;
+  const lp=$('#livepnl'), uplEl=$('#upl');
+  lp.className='livepnl'+(np?' on':'')+(np?(up>0?' pos':up<0?' neg':''):'');
+  const txt=(np?((up>0?'+':'')+fmt(up)):fmt(up))+' <small>USDT</small>';
+  if(uplEl.dataset.v!==String(up)){ uplEl.dataset.v=String(up); uplEl.classList.remove('flash'); void uplEl.offsetWidth; if(np)uplEl.classList.add('flash'); }
+  uplEl.innerHTML=txt;
+  const word=n=>n%10===1&&n%100!==11?'позиция':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'позиции':'позиций');
+  $('#lp-label').textContent=np?`В работе · ${np} ${word(np)}`:'Открытых позиций нет';
+  $('#lp-sub').innerHTML=np?a.positions.map(p=>{const pc=p.entry?100*(p.side==='Buy'?1:-1)*(p.mark-p.entry)/p.entry:0;
+    const dir=p.side==='Buy'?'лонг':'шорт';
+    const one=np===1?'':` ${pnl(p.upnl)}`;
+    return `<span class="mono">${p.sym.replace('USDT','')}</span> · ${dir} ${fmt(p.qty,3)} @ ${fmt(p.entry,4)}${one} <span class="pc">(${pnl(pc,2)}%)</span>`}).join('<br>'):'';
   const today=kyivDay(Date.now());
   const dt=(a.daily_pnl.find(x=>x.d===today)||{pnl:0}).pnl;
   const d30=a.daily_pnl.reduce((a,x)=>a+x.pnl,0);
