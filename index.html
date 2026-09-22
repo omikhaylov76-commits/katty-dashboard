@@ -125,18 +125,20 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .dots i.on{width:18px;background:var(--accent2)}
 .strat{border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;transition:border-color .4s}
 .strat[open]{border-color:color-mix(in srgb,var(--c,var(--accent)) 55%,var(--border))}
-.strat>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;min-height:56px}
+.strat>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;min-height:56px}
 .strat>summary::-webkit-details-marker{display:none}
-.strat .sdot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent));flex-shrink:0;box-shadow:0 0 0 4px color-mix(in srgb,var(--c,var(--accent)) 18%,transparent)}
+.strat .sdot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent));flex-shrink:0;margin-top:7px;box-shadow:0 0 0 4px color-mix(in srgb,var(--c,var(--accent)) 18%,transparent)}
+.strat .shead{min-width:0;padding-right:8px}
 .strat .sttl{font-weight:var(--fw-s);font-size:var(--fs-h2)}
-.strat .stag{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;line-height:1.35}
-.strat .schev{margin-left:auto;color:var(--muted);transition:transform .5s var(--spring);font-size:18px;flex-shrink:0}
+.strat .stag{font-size:var(--fs-xs);color:var(--muted);margin-top:3px;line-height:1.35;max-width:26ch}
+.strat .schev{margin-left:auto;color:var(--muted);transition:transform .5s var(--spring);font-size:18px;line-height:1;flex-shrink:0;width:24px;text-align:center;margin-top:-1px;transform-origin:50% 55%}
 .strat[open] .schev{transform:rotate(180deg)}
 .strat>.sbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .7s cubic-bezier(.22,1,.36,1)}
 .strat[open]>.sbody{grid-template-rows:1fr}
 .sbody>.sin{overflow:hidden;opacity:0;transform:translateY(-6px);transition:opacity .5s .15s,transform .6s .15s var(--spring)}
 .strat[open] .sbody>.sin{opacity:1;transform:none}
-.sin{padding:0 16px 16px}
+.sin{padding:0}
+.spad{padding:0 16px 16px}
 .sblock{margin-top:14px}
 .sblock h4{margin:0 0 5px;font-size:10px;font-weight:var(--fw-b);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps)}
 .sblock p{margin:0;font-size:var(--fs-sm);line-height:1.5;color:var(--text)}
@@ -311,10 +313,10 @@ function render(){
     const run=x.running||[]; const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
     const blk=(t,v,q)=>v?`<div class="sblock ${q?'quiet':''}"><h4>${t}</h4><p>${esc(v)}</p></div>`:'';
     return `<details class="strat" style="--c:${c}">
-      <summary><span class="sdot"></span><span><span class="sttl">${esc(x.title||x.name)}</span>
+      <summary><span class="sdot"></span><span class="shead"><span class="sttl">${esc(x.title||x.name)}</span>
         ${run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>'}
         <div class="stag">${esc(x.tagline||'')}</div></span><span class="schev">⌄</span></summary>
-      <div class="sbody"><div class="sin">
+      <div class="sbody"><div class="sin"><div class="spad">
         ${run.length?`<div class="sblock"><h4>Запущено сейчас</h4><div class="srun">${run.map(r=>
           `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · счёт ${esc(r.account)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
         ${blk('Идея',x.idea)}
@@ -326,7 +328,7 @@ function render(){
         ${blk('Где риск',x.risk)}
         ${blk('Почему это работает',x.why_it_works,true)}
         <div class="supd">описание обновлено ${esc(x.updated||'')}</div>
-      </div></div></details>`;
+      </div></div></div></details>`;
   }).join('')||'<div class="empty">Описаний пока нет</div>';
   $('#stratupd').textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
   $('#scants').textContent=s.scanner_ts?tstr(new Date(s.scanner_ts).getTime()):'';
