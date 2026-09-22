@@ -53,6 +53,7 @@ main{width:100%;max-width:480px;margin:0 auto;padding:0}
 .acctname .pdots{margin-left:6px;padding-left:8px;border-left:1px solid var(--border2)}
 .acctname .an{width:9px;height:9px;border-radius:50%;background:var(--pc,var(--accent));flex-shrink:0}
 .swipehint{text-align:center;color:var(--faint);font-size:10px;padding:14px 0 2px;letter-spacing:.04em}
+#strpage .page,#logpage .page,#labpage .page{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
 .card h2{margin:0 0 12px;font-size:var(--fs-xs);font-weight:var(--fw-s);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps);display:flex;justify-content:space-between;align-items:center}
@@ -135,12 +136,12 @@ details.acc[open] .acc-body>div{opacity:1;transform:none}
 .ev .t{color:var(--faint);font-size:var(--fs-xs)}
 .ev .why{color:var(--muted);font-size:var(--fs-xs);margin-top:2px}
 .scan .row{padding:8px 0}
-nav.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:20;padding-bottom:env(safe-area-inset-bottom);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);transform:translateZ(0)}
+nav.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:20;padding-bottom:env(safe-area-inset-bottom);background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);transform:translateZ(0)}
 nav.tabbar .in{max-width:480px;margin:0 auto;display:flex}
-nav.tabbar a{flex:1;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);text-decoration:none;font-size:10px;font-weight:var(--fw-m);transition:transform .25s var(--spring)}
+nav.tabbar a{flex:1;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);text-decoration:none;font-size:9.5px;font-weight:var(--fw-m);white-space:nowrap;transition:transform .25s var(--spring)}
 nav.tabbar a:active{transform:scale(.92)}
 nav.tabbar a.on{color:var(--accent2)}
-nav.tabbar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabbar svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 section[data-page]{display:none}section[data-page].on{display:block;animation:in .35s var(--spring)}
 @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .offline{background:color-mix(in srgb,var(--amber) 14%,transparent);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);color:var(--amber);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-xs);margin-bottom:12px;text-align:center}
@@ -178,7 +179,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .dots i.on{width:18px;background:var(--accent2)}
 .strat{border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;transition:border-color .4s}
 .strat[open]{border-color:color-mix(in srgb,var(--c,var(--accent)) 55%,var(--border))}
-.strat>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;min-height:56px}
+.strat>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;min-height:56px}
 .strat>summary::-webkit-details-marker{display:none}
 .strat .sdot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent));flex-shrink:0;margin-top:7px;box-shadow:0 0 0 4px color-mix(in srgb,var(--c,var(--accent)) 18%,transparent)}
 .strat .shead{min-width:0;padding-right:8px}
@@ -191,9 +192,9 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .sbody>.sin{overflow:hidden;opacity:0;transform:translateY(-6px);transition:opacity .5s .15s,transform .6s .15s var(--spring)}
 .strat[open] .sbody>.sin{opacity:1;transform:none}
 .sin{padding:0}
-.spad{padding:0 16px 16px}
+.spad{padding:0 16px 16px 16px}
 .sblock{margin-top:14px}
-.sblock h4{margin:0 0 5px;font-size:10px;font-weight:var(--fw-b);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps)}
+.sblock h4{margin:0 0 5px;font-size:10px;font-weight:var(--fw-b);color:#a5a4b8;text-transform:uppercase;letter-spacing:var(--ls-caps)}
 .sblock p{margin:0;font-size:var(--fs-sm);line-height:1.5;color:var(--text)}
 .sblock.quiet p{color:var(--muted)}
 .snums{display:grid;gap:1px;background:var(--border);border-radius:var(--r-sm);overflow:hidden;margin-top:6px}
@@ -304,11 +305,6 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
   </div>
   </div>
 
-  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
-    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-0" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div id="strategies-0"></div>
-  </div>
-
 <div class="swipehint">← листай вбок: другой счёт →</div></div>
 <div class="page" data-acc="1">
   <div id="lockmsg-1" class="lockmsg" style="display:none">Ждёт API-ключи</div>
@@ -353,11 +349,6 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
     <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl-1">0</span><span class="chev">⌄</span></summary>
       <div class="acc-body"><div id="closed-1"></div></div></details>
   </div>
-  </div>
-
-  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
-    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-1" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div id="strategies-1"></div>
   </div>
 
 <div class="swipehint">← листай вбок: другой счёт →</div></div>
@@ -406,16 +397,16 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
   </div>
   </div>
 
-  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
-    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-2" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div id="strategies-2"></div>
-  </div>
-
 <div class="swipehint">← листай вбок: другой счёт →</div></div>
 </div>
 <div id="labpage" style="display:none"><div class="page" style="flex:none">
   <div class="card"><h2>Эксперименты</h2><div id="exps"></div></div>
   <div class="card scan"><h2>Сканер · пампы 24ч <span id="scants" class="mono" style="letter-spacing:0;text-transform:none"></span></h2><div id="scanner"></div></div>
+</div></div>
+<div id="strpage" style="display:none"><div class="page" style="flex:none">
+  <div class="jfilter" id="strfilter"></div>
+  <div id="strategies" style="padding-bottom:16px"></div>
+  <div class="swipehint" style="padding-top:20px">описания обновляются при каждом изменении логики · <span id="stratupd" class="mono"></span></div>
 </div></div>
 <div id="logpage" style="display:none"><div class="page" style="flex:none">
   <div class="jfilter" id="jfilter"></div>
@@ -428,6 +419,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
   <a href="#home" class="on" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Счёт</a>
   <a href="#lab" data-nav="lab"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4 20h16l-6-11V3"/></svg>Лаборатория</a>
   <a href="#log" data-nav="log"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Журнал</a>
+  <a href="#str" data-nav="str"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg>Стратегии</a>
 </div></nav>
 
 <script>
@@ -526,19 +518,33 @@ function renderPage(a,i,s){
   q('closed').innerHTML=tr.length?tr.slice(0,20).map(c=>`<div class="row"><div class="l"><span class="sym">${c.sym}</span><span class="badge b-mut">${c.side==='Buy'?'↑ лонг':'↓ шорт'}</span>
     <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.closed)}</div></div></div>`).join(''):'<div class="empty">Сделок пока нет</div>';
 
-  // стратегии этого счёта
+}
+
+let strFilter='all';
+function renderStrategies(){
+  const s=ST; if(!s) return;
   const stColor={'основная':'var(--accent)','наблюдение':'var(--amber)','контроль':'var(--faint)','закрыта':'var(--faint)'};
-  const strs=(s.strategies||[]).filter(x=>x.name==='_risk'||(x.running||[]).some(r=>String(r.account)===a.slot)||!(x.running||[]).length);
-  q('strategies').innerHTML=strs.map(x=>{
-    const run=(x.running||[]).filter(r=>String(r.account)===a.slot); const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
-    const blk=(ti,v,qq)=>v?`<div class="sblock ${qq?'quiet':''}"><h4>${ti}</h4><p>${esc(v)}</p></div>`:'';
+  const list=(s.strategies||[]);
+  const groups=[['all','Все',list.length],['live','В работе',list.filter(x=>(x.running||[]).length).length],
+                ['off','Остановленные',list.filter(x=>!(x.running||[]).length&&x.name!=='_risk').length],
+                ['risk','Риск-политика',list.filter(x=>x.name==='_risk').length]];
+  $('#strfilter').innerHTML=groups.filter(g=>g[2]>0).map(g=>
+    `<button class="chip ${strFilter===g[0]?'on':''}" data-sf="${g[0]}" style="--cc:var(--accent2)"><span class="cd"></span>${g[1]}<span class="cn">${g[2]}</span></button>`).join('');
+  const shown=strFilter==='all'?list
+    :strFilter==='live'?list.filter(x=>(x.running||[]).length)
+    :strFilter==='risk'?list.filter(x=>x.name==='_risk')
+    :list.filter(x=>!(x.running||[]).length&&x.name!=='_risk');
+  $('#strategies').innerHTML=shown.map(x=>{
+    const run=x.running||[], c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
+    const blk=(ti,v,q)=>v?`<div class="sblock ${q?'quiet':''}"><h4>${ti}</h4><p>${esc(v)}</p></div>`:'';
+    const acc={'1':'Счёт 1','2':'Счёт 2','3':'Счёт 3'};
     return `<details class="strat" style="--c:${c}">
       <summary><span class="sdot"></span><span class="shead"><span class="sttl">${esc(x.title||x.name)}</span>
-        ${x.name==='_risk'?'<span class="badge b-acc">политика</span>':(run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>')}
+        ${x.name==='_risk'?'<span class="badge b-acc">политика</span>':(run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">остановлена</span>')}
         <div class="stag">${esc(x.tagline||'')}</div></span><span class="schev">⌄</span></summary>
       <div class="sbody"><div class="sin"><div class="spad">
-        ${run.length?`<div class="sblock"><h4>Запущено на этом счёте</h4><div class="srun">${run.map(r=>
-          `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
+        ${run.length?`<div class="sblock"><h4>Запущено сейчас</h4><div class="srun">${run.map(r=>
+          `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · ${esc(acc[r.account]||('счёт '+r.account))} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
         ${blk('Идея',x.idea)}
         ${blk(x.name==='_risk'?'Уровни':'Как вхожу',x.entry)}
         ${blk(x.name==='_risk'?'Дополнительные стопы':'Как выхожу',x.exit)}
@@ -549,9 +555,10 @@ function renderPage(a,i,s){
         ${blk('Почему это работает',x.why_it_works,true)}
         <div class="supd">обновлено ${esc(x.updated||'')}</div>
       </div></div></div></details>`;
-  }).join('')||'<div class="empty">Нет описаний</div>';
-  const su=q('stratupd'); if(su) su.textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
+  }).join('')||'<div class="jempty">Нет описаний</div>';
+  const su=$('#stratupd'); if(su) su.textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
 }
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sf]');if(!b)return;strFilter=b.dataset.sf;renderStrategies()});
 
 function renderLab(s){
   const e1=$('#exps'), e2=$('#scanner');
@@ -719,11 +726,13 @@ function nav(){
   $('#pager').style.display = pg==='home'?'flex':'none';
   $('#labpage').style.display = pg==='lab'?'block':'none';
   $('#logpage').style.display = pg==='log'?'block':'none';
+  $('#strpage').style.display = pg==='str'?'block':'none';
   $('#acctname').style.display = pg==='home'?'flex':'none';
   $('#pdots').style.display = pg==='home'?'flex':'none';
   document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===pg));
   if(pg==='home'&&ST){ requestAnimationFrame(()=>{ pager.scrollLeft=cur*pager.clientWidth; drawEq(cur,ST.accounts[cur]); }); }
   if(pg==='log') renderJournal();
+  if(pg==='str') renderStrategies();
 }
 addEventListener('hashchange',nav);
 addEventListener('resize',()=>{ if(ST){ ST.accounts.forEach((a,i)=>drawEq(i,a)); if((location.hash||'#home')==='#home') pager.scrollLeft=cur*pager.clientWidth; } });
