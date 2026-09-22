@@ -30,7 +30,7 @@ html,body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--text);font
 .mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 header{position:fixed;top:0;left:0;right:0;z-index:20;height:calc(var(--hdr) + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);
   background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transform:translateZ(0)}
-.hin{max-width:480px;margin:0 auto;height:var(--hdr);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.hin{max-width:480px;margin:0 auto;height:var(--hdr);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:var(--fw-s)}
 .sigil{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:13px;color:#fff;font-weight:var(--fw-b)}
 .status{display:flex;align-items:center;gap:8px;font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps)}
@@ -235,77 +235,176 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 <body>
 <header><div class="hin">
   <div class="brand"><div class="sigil">K</div><div>Кэтти <span style="color:var(--muted);font-weight:400">· Lab</span></div></div>
+  <div class="acctname" id="acctname"><span class="an"></span><span id="accttitle">—</span></div>
+  <div class="pdots" id="pdots"></div>
   <div class="status"><span id="botdot" class="dot"></span><span id="bottxt">—</span></div>
 </div></header>
 
 <main>
-<div id="offbar" class="offline" style="display:none">Нет сети — показаны последние загруженные данные</div>
-  <div id="killbar" class="kill" style="display:none">KILL — торговля остановлена</div>
-<div id="errbox" class="err" style="display:none"></div>
-
-<section data-page="home" class="on">
-  <div id="lockmsg" class="lockmsg" style="display:none">Ждёт API-ключи</div>
-  <div id="acctbody">
+<div class="pager" id="pager">
+<div class="page" data-acc="0">
+  <div id="lockmsg-0" class="lockmsg" style="display:none">Ждёт API-ключи</div>
+  <div id="acctbody-0">
   <div class="card hero">
     <h2>Демо-счёт Bybit <span id="upd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div class="eq mono" id="equity">—</div>
+    <div class="eq mono" id="equity-0">—</div>
     <div class="sub">
-      <span>Свободно <b class="mono" id="avail">—</b></span>
+      <span>Свободно <b class="mono" id="avail-0">—</b></span>
     </div>
-    <div class="livepnl" id="livepnl">
-      <div class="lp-head"><span class="lp-dot"></span><span id="lp-label">Открытых позиций нет</span></div>
-      <div class="lp-val mono" id="upl">—</div>
-      <div class="lp-sub" id="lp-sub"></div>
+    <div class="livepnl" id="livepnl-0">
+      <div class="lp-head"><span class="lp-dot"></span><span id="lp-label-0">Открытых позиций нет</span></div>
+      <div class="lp-val mono" id="upl-0">—</div>
+      <div class="lp-sub" id="lp-sub-0"></div>
     </div>
-    <div class="riskbar" id="riskbar"></div>
+    <div class="riskbar" id="riskbar-0"></div>
     <div class="tiles">
-      <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today">—</div></div>
-      <div class="tile"><div class="k">30 дней</div><div class="v mono" id="t-30">—</div></div>
-      <div class="tile"><div class="k">К цели +5%</div><div class="v mono" id="t-goal">—</div></div>
-      <div class="tile"><div class="k">Сделок</div><div class="v mono" id="t-n">—</div></div>
-      <div class="tile"><div class="k">Win rate</div><div class="v mono" id="t-wr">—</div></div>
-      <div class="tile"><div class="k">Profit factor</div><div class="v mono" id="t-pf">—</div></div>
+      <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today-0">—</div></div>
+      <div class="tile"><div class="k">30 дней</div><div class="v mono" id="t-30-0">—</div></div>
+      <div class="tile"><div class="k">К цели +5%</div><div class="v mono" id="t-goal-0">—</div></div>
+      <div class="tile"><div class="k">Сделок</div><div class="v mono" id="t-n-0">—</div></div>
+      <div class="tile"><div class="k">Win rate</div><div class="v mono" id="t-wr-0">—</div></div>
+      <div class="tile"><div class="k">Profit factor</div><div class="v mono" id="t-pf-0">—</div></div>
     </div>
   </div>
 
   <div class="card">
-    <h2>Кривая счёта <div class="tabs" id="ptabs"><button data-p="1" class="on">1Д</button><button data-p="7">7Д</button><button data-p="30">30Д</button></div></h2>
-    <div class="chartwrap"><canvas id="eqc"></canvas><div class="tip" id="eqtip"><div id="tipd"></div><div class="tv mono" id="tipv"></div></div></div>
+    <h2>Кривая счёта <div class="tabs" id="ptabs-0"><button data-p="1" class="on">1Д</button><button data-p="7">7Д</button><button data-p="30">30Д</button></div></h2>
+    <div class="chartwrap"><canvas id="eqc-0"></canvas><div class="tip" id="eqtip-0"><div id="tipd-0"></div><div class="tv mono" id="tipv-0"></div></div></div>
   </div>
 
   <div class="card">
-    <h2>Дневной PnL <span class="mono" id="dsum" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div id="dbars"></div>
+    <h2>Дневной PnL <span class="mono" id="dsum-0" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="dbars-0"></div>
   </div>
 
   <div class="card">
-    <details class="acc" open><summary>Открытые позиции <span class="cnt" id="npos">0</span><span class="chev">⌄</span></summary>
-      <div class="acc-body"><div id="positions"></div></div></details>
-    <details class="acc" open><summary>Ордера на бирже <span class="cnt" id="nord">0</span><span class="chev">⌄</span></summary>
-      <div class="acc-body"><div id="orders"></div></div></details>
-    <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl">0</span><span class="chev">⌄</span></summary>
-      <div class="acc-body"><div id="closed"></div></div></details>
+    <details class="acc" open><summary>Открытые позиции <span class="cnt" id="npos-0">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="positions-0"></div></div></details>
+    <details class="acc" open><summary>Ордера на бирже <span class="cnt" id="nord-0">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="orders-0"></div></div></details>
+    <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl-0">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="closed-0"></div></div></details>
   </div>
   </div>
-  <div class="dots" id="dots"></div>
-  <div class="caro" id="caro"></div>
 
   <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
-    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
-    <div id="strategies"></div>
+    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-0" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="strategies-0"></div>
   </div>
-</section>
 
-<section data-page="lab">
+<div class="swipehint">← листай вбок: другой счёт →</div></div>
+<div class="page" data-acc="1">
+  <div id="lockmsg-1" class="lockmsg" style="display:none">Ждёт API-ключи</div>
+  <div id="acctbody-1">
+  <div class="card hero">
+    <h2>Демо-счёт Bybit <span id="upd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div class="eq mono" id="equity-1">—</div>
+    <div class="sub">
+      <span>Свободно <b class="mono" id="avail-1">—</b></span>
+    </div>
+    <div class="livepnl" id="livepnl-1">
+      <div class="lp-head"><span class="lp-dot"></span><span id="lp-label-1">Открытых позиций нет</span></div>
+      <div class="lp-val mono" id="upl-1">—</div>
+      <div class="lp-sub" id="lp-sub-1"></div>
+    </div>
+    <div class="riskbar" id="riskbar-1"></div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today-1">—</div></div>
+      <div class="tile"><div class="k">30 дней</div><div class="v mono" id="t-30-1">—</div></div>
+      <div class="tile"><div class="k">К цели +5%</div><div class="v mono" id="t-goal-1">—</div></div>
+      <div class="tile"><div class="k">Сделок</div><div class="v mono" id="t-n-1">—</div></div>
+      <div class="tile"><div class="k">Win rate</div><div class="v mono" id="t-wr-1">—</div></div>
+      <div class="tile"><div class="k">Profit factor</div><div class="v mono" id="t-pf-1">—</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Кривая счёта <div class="tabs" id="ptabs-1"><button data-p="1" class="on">1Д</button><button data-p="7">7Д</button><button data-p="30">30Д</button></div></h2>
+    <div class="chartwrap"><canvas id="eqc-1"></canvas><div class="tip" id="eqtip-1"><div id="tipd-1"></div><div class="tv mono" id="tipv-1"></div></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Дневной PnL <span class="mono" id="dsum-1" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="dbars-1"></div>
+  </div>
+
+  <div class="card">
+    <details class="acc" open><summary>Открытые позиции <span class="cnt" id="npos-1">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="positions-1"></div></div></details>
+    <details class="acc" open><summary>Ордера на бирже <span class="cnt" id="nord-1">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="orders-1"></div></div></details>
+    <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl-1">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="closed-1"></div></div></details>
+  </div>
+  </div>
+
+  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
+    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-1" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="strategies-1"></div>
+  </div>
+
+<div class="swipehint">← листай вбок: другой счёт →</div></div>
+<div class="page" data-acc="2">
+  <div id="lockmsg-2" class="lockmsg" style="display:none">Ждёт API-ключи</div>
+  <div id="acctbody-2">
+  <div class="card hero">
+    <h2>Демо-счёт Bybit <span id="upd" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div class="eq mono" id="equity-2">—</div>
+    <div class="sub">
+      <span>Свободно <b class="mono" id="avail-2">—</b></span>
+    </div>
+    <div class="livepnl" id="livepnl-2">
+      <div class="lp-head"><span class="lp-dot"></span><span id="lp-label-2">Открытых позиций нет</span></div>
+      <div class="lp-val mono" id="upl-2">—</div>
+      <div class="lp-sub" id="lp-sub-2"></div>
+    </div>
+    <div class="riskbar" id="riskbar-2"></div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today-2">—</div></div>
+      <div class="tile"><div class="k">30 дней</div><div class="v mono" id="t-30-2">—</div></div>
+      <div class="tile"><div class="k">К цели +5%</div><div class="v mono" id="t-goal-2">—</div></div>
+      <div class="tile"><div class="k">Сделок</div><div class="v mono" id="t-n-2">—</div></div>
+      <div class="tile"><div class="k">Win rate</div><div class="v mono" id="t-wr-2">—</div></div>
+      <div class="tile"><div class="k">Profit factor</div><div class="v mono" id="t-pf-2">—</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Кривая счёта <div class="tabs" id="ptabs-2"><button data-p="1" class="on">1Д</button><button data-p="7">7Д</button><button data-p="30">30Д</button></div></h2>
+    <div class="chartwrap"><canvas id="eqc-2"></canvas><div class="tip" id="eqtip-2"><div id="tipd-2"></div><div class="tv mono" id="tipv-2"></div></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Дневной PnL <span class="mono" id="dsum-2" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="dbars-2"></div>
+  </div>
+
+  <div class="card">
+    <details class="acc" open><summary>Открытые позиции <span class="cnt" id="npos-2">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="positions-2"></div></div></details>
+    <details class="acc" open><summary>Ордера на бирже <span class="cnt" id="nord-2">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="orders-2"></div></div></details>
+    <details class="acc"><summary>Сделки лаборатории <span class="cnt" id="ncl-2">0</span><span class="chev">⌄</span></summary>
+      <div class="acc-body"><div id="closed-2"></div></div></details>
+  </div>
+  </div>
+
+  <div class="card" style="background:transparent;border:0;padding:0;margin-top:18px">
+    <h2 style="padding:0 2px">Что я сейчас торгую <span id="stratupd-2" class="mono" style="letter-spacing:0;text-transform:none"></span></h2>
+    <div id="strategies-2"></div>
+  </div>
+
+<div class="swipehint">← листай вбок: другой счёт →</div></div>
+</div>
+<div id="labpage" style="display:none"><div class="page" style="flex:none">
   <div class="card"><h2>Эксперименты</h2><div id="exps"></div></div>
   <div class="card scan"><h2>Сканер · пампы 24ч <span id="scants" class="mono" style="letter-spacing:0;text-transform:none"></span></h2><div id="scanner"></div></div>
-</section>
-
-<section data-page="log">
+</div></div>
+<div id="logpage" style="display:none"><div class="page" style="flex:none">
   <div class="jfilter" id="jfilter"></div>
   <div class="jsum" id="jsum"></div>
   <div id="jlist"></div>
-</section>
+</div></div>
 </main>
 
 <nav class="tabbar"><div class="in">
@@ -321,73 +420,77 @@ const sgn=v=>v>0?'pos':v<0?'neg':'zero';
 const pnl=(v,d=2)=>`<span class="${sgn(v)}">${v>0?'+':''}${fmt(v,d)}</span>`;
 const tstr=ms=>new Date(ms).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const kyivDay=ms=>new Date(ms).toLocaleDateString('sv-SE',{timeZone:'Europe/Kiev'});
-let ST=null, period=1, cur=+(localStorage.getItem('acct')||0);
+const esc=x=>String(x==null?'':x).replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');
 const COLORS=['#7132F5','#e3a63b','#2fbf8f'];
-const A=()=>ST.accounts[cur];
+let ST=null, cur=+(localStorage.getItem('acct')||0), period={0:1,1:1,2:1};
 
 async function load(){
   try{
     const src=location.hostname.endsWith('github.io')||location.protocol==='file:'?'state.json?'+Date.now():'/api/state';
     const r=await fetch(src,{cache:'no-store'}); ST=await r.json(); render();
     showOff(false);
-  }catch(e){ if(!navigator.onLine){showOff(true);} else {$('#errbox').style.display='block'; $('#errbox').textContent='Сервер дашборда недоступен: '+e;} }
+  }catch(e){ if(!navigator.onLine){showOff(true);} else {const b=$('#errbox'); if(b){b.style.display='block'; b.textContent='Сервер недоступен: '+e;}} }
 }
 
-const esc=x=>String(x==null?'':x).replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');
 function render(){
   const s=ST;
-  $('#errbox').style.display='none';
   $('#killbar').style.display=s.kill?'block':'none';
-  $('#botdot').className='dot '+(s.bot_alive?'on':'off'); $('#bottxt').textContent=s.bot_alive?'бот жив':'бот не запущен';
-  const age=Math.round((Date.now()-new Date(s.ts))/60000); $('#upd').textContent=new Date(s.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+(age>1?' · '+age+' мин назад':'');
-  // account carousel
-  const a=A(); const START=a.start||a.equity||1;
-  const caro=$('#caro'); const firstRender=!caro.children.length;
-  caro.innerHTML=s.accounts.map((x,i)=>{const p=x.start?100*(x.equity-x.start)/x.start:0; const dp=(x.daily_pnl.find(d=>d.d===kyivDay(Date.now()))||{pnl:0}).pnl;
-    const w=x.closed.filter(c=>c.pnl>0).length;
-    return `<div class="ac ${i===cur?'on':''} ${x.connected?'':'wait'}" data-i="${i}" style="--c:${COLORS[i]}" role="button" tabindex="0" aria-label="${x.name}">
-      <div class="top"><div class="av">${x.slot}</div><div><div class="nm">${x.name}</div><div class="rl">${x.role}</div></div>
-        <div class="st"><span class="badge ${x.connected?(x.positions.length?'b-long':'b-mut'):'b-mut'}">${x.connected?(x.positions.length?x.positions.length+' в рынке':'ожидание'):'нет ключей'}</span></div></div>
-      <div class="mid"><div><div class="bal mono">${x.connected?fmt(x.equity):'—'}<small>USDT</small></div>
-        <div class="pl mono">${x.connected?pnl(x.equity-x.start)+' · '+pnl(p,2)+'%':''}</div></div>
-        <canvas class="spark" id="sp${i}"></canvas></div>
-      <div class="bot mono"><span>Сегодня <b class="${sgn(dp)}">${dp>0?'+':''}${fmt(dp)}</b></span><span>Сделок <b>${x.closed.length}</b></span><span>Win <b>${x.closed.length?Math.round(100*w/x.closed.length)+'%':'—'}</b></span></div>
-      ${x.connected?'':'<div class="waitmsg">Ждёт API-ключи</div>'}</div>`}).join('');
-  $('#dots').innerHTML=s.accounts.map((_,i)=>`<i class="${i===cur?'on':''}"></i>`).join('');
-  s.accounts.forEach((x,i)=>spark($('#sp'+i),x.equity_series,x.start,COLORS[i]));
-  if(firstRender) requestAnimationFrame(()=>caro.children[cur]&&caro.children[cur].scrollIntoView({inline:'center',block:'nearest',behavior:'instant'}));
-  $('#lockmsg').style.display='none'; $('#acctbody').classList.toggle('locked',!a.connected);
-  if(a.errors.length){$('#errbox').style.display='block';$('#errbox').textContent=a.errors.join(' · ')}
-  $('#equity').textContent=fmt(a.equity)+' USDT';
-  $('#avail').textContent=fmt(a.available);
-  // живая прибыль — крупно, пока позиция в работе
-  const up=a.unrealised, np=a.positions.length;
-  const lp=$('#livepnl'), uplEl=$('#upl');
+  $('#botdot').className='dot '+(s.bot_alive?'on':'off'); $('#bottxt').textContent=s.bot_alive?'бот жив':'бот стоит';
+  (s.accounts||[]).forEach((a,i)=>renderPage(a,i,s));
+  $('#pdots').innerHTML=(s.accounts||[]).map((_,i)=>`<i class="${i===cur?'on':''}"></i>`).join('');
+  const a=(s.accounts||[])[cur];
+  if(a){ $('#accttitle').textContent=`${a.name} · ${a.role}`;
+    document.documentElement.style.setProperty('--pc',COLORS[cur]); }
+  renderLab(s); renderJournal();
+}
+
+function renderPage(a,i,s){
+  const q=id=>document.getElementById(id+'-'+i);
+  if(!q('equity')) return;
+  const START=a.start||a.equity||1;
+  const eb=q('acctbody');
+  if(eb) eb.classList.toggle('locked',!a.connected);
+  const lm=q('lockmsg'); if(lm) lm.style.display=a.connected?'none':'block';
+  q('equity').textContent=fmt(a.equity)+' USDT';
+  q('avail').textContent=fmt(a.available);
+
+  // живая прибыль
+  const up=a.unrealised, np=a.positions.length, lp=q('livepnl'), uplEl=q('upl');
   lp.className='livepnl'+(np?' on':'')+(np?(up>0?' pos':up<0?' neg':''):'');
-  const txt=(np?((up>0?'+':'')+fmt(up)):fmt(up))+' <small>USDT</small>';
   if(uplEl.dataset.v!==String(up)){ uplEl.dataset.v=String(up); uplEl.classList.remove('flash'); void uplEl.offsetWidth; if(np)uplEl.classList.add('flash'); }
-  uplEl.innerHTML=txt;
+  uplEl.innerHTML=(np?((up>0?'+':'')+fmt(up)):fmt(up))+' <small>USDT</small>';
   const word=n=>n%10===1&&n%100!==11?'позиция':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'позиции':'позиций');
-  $('#lp-label').textContent=np?`В работе · ${np} ${word(np)}`:'Открытых позиций нет';
-  $('#lp-sub').innerHTML=np?a.positions.map(p=>{const pc=p.entry?100*(p.side==='Buy'?1:-1)*(p.mark-p.entry)/p.entry:0;
-    const dir=p.side==='Buy'?'лонг':'шорт';
+  q('lp-label').textContent=np?`В работе · ${np} ${word(np)}`:'Открытых позиций нет';
+  q('lp-sub').innerHTML=np?a.positions.map(p=>{const pc=p.entry?100*(p.side==='Buy'?1:-1)*(p.mark-p.entry)/p.entry:0;
     const one=np===1?'':` ${pnl(p.upnl)}`;
-    return `<span class="mono">${p.sym.replace('USDT','')}</span> · ${dir} ${fmt(p.qty,3)} @ ${fmt(p.entry,4)}${one} <span class="pc">(${pnl(pc,2)}%)</span>`}).join('<br>'):'';
+    return `<span class="mono">${p.sym.replace('USDT','')}</span> · ${p.side==='Buy'?'лонг':'шорт'} ${fmt(p.qty,3)} @ ${fmt(p.entry,4)}${one} <span class="pc">(${pnl(pc,2)}%)</span>`}).join('<br>'):'';
+
+  // риск
+  const LVL={green:'норма',yellow:'жёлтый',orange:'оранжевый',red:'СТОП',daily:'дневной стоп'};
+  const myRisk=(s.risk||[]).filter(r=>{const e=(s.experiments||[]).find(x=>x.id===r.exp); return e&&String(e.account)===a.slot&&e.live});
+  q('riskbar').innerHTML=myRisk.length?myRisk.map(r=>`<div class="rk ${r.level}">
+    <div class="rkt"><span class="rkd"></span>${esc(r.exp)} · ${esc(LVL[r.level]||r.level)}</div>
+    <div class="rkv">−${fmt(r.dd,2)}%</div>
+    <div class="rks">от пика ${fmt(r.peak,0)}${r.consec?' · '+r.consec+' убытка подряд':''}</div></div>`).join(''):'';
+
+  // плитки
   const today=kyivDay(Date.now());
   const dt=(a.daily_pnl.find(x=>x.d===today)||{pnl:0}).pnl;
-  const d30=a.daily_pnl.reduce((a,x)=>a+x.pnl,0);
-  $('#t-today').innerHTML=pnl(dt); $('#t-30').innerHTML=pnl(d30);
-  const goal=START*1.05; $('#t-goal').innerHTML=pnl(a.equity-goal)+`<span class="meta" style="display:block">цель ${fmt(goal,0)}</span>`;
-  const cl=a.closed; const w=cl.filter(c=>c.pnl>0), l=cl.filter(c=>c.pnl<=0);
-  $('#t-n').textContent=cl.length; $('#t-wr').textContent=cl.length?fmt(100*w.length/cl.length,0)+'%':'—';
-  const gp=w.reduce((a,c)=>a+c.pnl,0), gl=-l.reduce((a,c)=>a+c.pnl,0);
-  $('#t-pf').textContent=cl.length?(gl>0?fmt(gp/gl,2):'∞'):'—';
-  drawEq(); drawBars();
-  // positions
-  $('#npos').textContent=a.positions.length;
-  $('#positions').innerHTML=a.positions.length?a.positions.map(p=>{
-    const long=p.side==='Buy'; const lo=long?p.sl:p.tp, hi=long?p.tp:p.sl;
-    const pct=(x)=>(lo&&hi&&hi>lo)?Math.max(0,Math.min(100,100*(x-lo)/(hi-lo))):50;
+  const d30=a.daily_pnl.reduce((x,y)=>x+y.pnl,0);
+  q('t-today').innerHTML=pnl(dt); q('t-30').innerHTML=pnl(d30);
+  const goal=START*1.05; q('t-goal').innerHTML=pnl(a.equity-goal)+`<span class="meta" style="display:block">цель ${fmt(goal,0)}</span>`;
+  const cl=a.closed, w=cl.filter(c=>c.pnl>0), l=cl.filter(c=>c.pnl<=0);
+  q('t-n').textContent=cl.length; q('t-wr').textContent=cl.length?fmt(100*w.length/cl.length,0)+'%':'—';
+  const gp=w.reduce((x,c)=>x+c.pnl,0), gl=-l.reduce((x,c)=>x+c.pnl,0);
+  q('t-pf').textContent=cl.length?(gl>0?fmt(gp/gl,2):'∞'):'—';
+
+  drawEq(i,a); drawBars(i,a);
+
+  // позиции / ордера / сделки
+  q('npos').textContent=a.positions.length;
+  q('positions').innerHTML=a.positions.length?a.positions.map(p=>{
+    const long=p.side==='Buy', lo=long?p.sl:p.tp, hi=long?p.tp:p.sl;
+    const pct=x=>(lo&&hi&&hi>lo)?Math.max(0,Math.min(100,100*(x-lo)/(hi-lo))):50;
     const upct=p.entry?100*(long?1:-1)*(p.mark-p.entry)/p.entry:0;
     return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between">
       <div class="l"><span class="sym">${p.sym}</span><span class="badge ${long?'b-long':'b-short'}">${long?'long':'short'}</span><span class="badge b-mut">${p.lev}x</span>${p.legacy?'<span class="badge b-amb">старое</span>':''}
@@ -396,37 +499,29 @@ function render(){
       <div class="track"><span class="en" style="left:${pct(p.entry)}%"></span><span class="pin" style="left:${pct(p.mark)}%"></span></div>
       <div class="tlabels mono"><span>SL ${p.sl?fmt(p.sl,4):'—'}</span><span>TP ${p.tp?fmt(p.tp,4):'—'}</span></div></div>`;
   }).join(''):'<div class="empty">Позиций нет</div>';
-  $('#nord').textContent=a.orders.length;
-  $('#orders').innerHTML=a.orders.length?a.orders.map(o=>`<div class="row"><div class="l"><span class="sym">${o.sym}</span>
+  q('nord').textContent=a.orders.length;
+  q('orders').innerHTML=a.orders.length?a.orders.map(o=>`<div class="row"><div class="l"><span class="sym">${o.sym}</span>
     <span class="badge ${o.side==='Buy'?'b-long':'b-short'}">${o.side==='Buy'?'buy':'sell'}</span><span class="badge b-mut">${o.type}${o.reduce?' · close':''}</span>${o.legacy?'<span class="badge b-amb">старое</span>':''}
     <div class="meta mono">${fmt(o.qty,3)} @ ${o.price?fmt(o.price,4):'trig '+fmt(o.trigger,4)}${o.sl?' · SL '+fmt(o.sl,4):''}${o.tp?' · TP '+fmt(o.tp,4):''}</div></div>
     <div class="r"><span class="badge b-acc">${o.status}</span><div class="meta">${tstr(o.created)}</div></div></div>`).join(''):'<div class="empty">Ордеров нет</div>';
-  $('#ncl').textContent=cl.length;
-  $('#closed').innerHTML=cl.length?cl.slice(0,30).map(c=>`<div class="row"><div class="l"><span class="sym">${c.sym}</span><span class="badge ${c.side==='Sell'?'b-long':'b-short'}">${c.side==='Sell'?'long':'short'}</span>
-    <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)} · ${fmt(c.qty,3)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.t)}</div></div></div>`).join(''):'<div class="empty">Сделок пока нет — история прежних ботов скрыта</div>';
-  // lab
-  $('#exps').innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${e.id||e.file}</span><span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${e.mode||'?'}</span>${e.live?'<span class="badge b-long">идёт</span>':'<span class="badge b-mut">остановлен</span>'}</div>
-    <div class="hy">${e.hypothesis||''}</div><div class="pm mono">${e.strategy||''} · ${(e.symbols||[]).join(', ')} · ${e.start||''} → ${e.end||''}</div></div>`).join(''):'<div class="empty">Экспериментов пока нет — конвейер строится</div>';
-  // риск-контроль по экспериментам этого счёта
-  const LVL={green:'норма',yellow:'жёлтый',orange:'оранжевый',red:'СТОП',daily:'дневной стоп'};
-  const myRisk=(s.risk||[]).filter(r=>{const e=(s.experiments||[]).find(x=>x.id===r.exp); return e&&String(e.account)===a.slot&&e.live});
-  $('#riskbar').innerHTML=myRisk.length?myRisk.map(r=>`<div class="rk ${r.level}">
-    <div class="rkt"><span class="rkd"></span>${esc(r.exp)} · ${esc(LVL[r.level]||r.level)}</div>
-    <div class="rkv">−${fmt(r.dd,2)}%</div>
-    <div class="rks">от пика ${fmt(r.peak,0)}${r.consec?' · '+r.consec+' убытка подряд':''}</div></div>`).join(''):'';
+  const tr=(a.trades||[]).filter(x=>!x.service);
+  q('ncl').textContent=tr.length;
+  q('closed').innerHTML=tr.length?tr.slice(0,20).map(c=>`<div class="row"><div class="l"><span class="sym">${c.sym}</span><span class="badge b-mut">${c.side==='Buy'?'↑ лонг':'↓ шорт'}</span>
+    <div class="meta mono">${fmt(c.entry,4)} → ${fmt(c.exit,4)}</div></div><div class="r mono">${pnl(c.pnl)}<div class="meta">${tstr(c.closed)}</div></div></div>`).join(''):'<div class="empty">Сделок пока нет</div>';
 
-  // стратегии — описание текущей логики
-  const stColor={'основная':'var(--accent)','наблюдение':'var(--amber)','контроль':'var(--faint)'};
-  $('#strategies').innerHTML=(s.strategies||[]).map(x=>{
-    const run=x.running||[]; const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
-    const blk=(t,v,q)=>v?`<div class="sblock ${q?'quiet':''}"><h4>${t}</h4><p>${esc(v)}</p></div>`:'';
+  // стратегии этого счёта
+  const stColor={'основная':'var(--accent)','наблюдение':'var(--amber)','контроль':'var(--faint)','закрыта':'var(--faint)'};
+  const strs=(s.strategies||[]).filter(x=>x.name==='_risk'||(x.running||[]).some(r=>String(r.account)===a.slot)||!(x.running||[]).length);
+  q('strategies').innerHTML=strs.map(x=>{
+    const run=(x.running||[]).filter(r=>String(r.account)===a.slot); const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
+    const blk=(ti,v,qq)=>v?`<div class="sblock ${qq?'quiet':''}"><h4>${ti}</h4><p>${esc(v)}</p></div>`:'';
     return `<details class="strat" style="--c:${c}">
       <summary><span class="sdot"></span><span class="shead"><span class="sttl">${esc(x.title||x.name)}</span>
         ${x.name==='_risk'?'<span class="badge b-acc">политика</span>':(run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>')}
         <div class="stag">${esc(x.tagline||'')}</div></span><span class="schev">⌄</span></summary>
       <div class="sbody"><div class="sin"><div class="spad">
-        ${run.length?`<div class="sblock"><h4>Запущено сейчас</h4><div class="srun">${run.map(r=>
-          `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · счёт ${esc(r.account)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
+        ${run.length?`<div class="sblock"><h4>Запущено на этом счёте</h4><div class="srun">${run.map(r=>
+          `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
         ${blk('Идея',x.idea)}
         ${blk(x.name==='_risk'?'Уровни':'Как вхожу',x.entry)}
         ${blk(x.name==='_risk'?'Дополнительные стопы':'Как выхожу',x.exit)}
@@ -435,74 +530,71 @@ function render(){
           x.numbers.map(n=>`<div><span>${esc(n[0])}</span><span>${esc(n[1])}</span></div>`).join('')}</div></div>`:''}
         ${blk('Где риск',x.risk)}
         ${blk('Почему это работает',x.why_it_works,true)}
-        <div class="supd">описание обновлено ${esc(x.updated||'')}</div>
+        <div class="supd">обновлено ${esc(x.updated||'')}</div>
       </div></div></div></details>`;
-  }).join('')||'<div class="empty">Описаний пока нет</div>';
-  $('#stratupd').textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
-  $('#scants').textContent=s.scanner_ts?tstr(new Date(s.scanner_ts).getTime()):'';
-  $('#scanner').innerHTML=s.scanner.length?s.scanner.map(x=>`<div class="row"><div class="l"><span class="sym">${x.sym.replace('USDT','')}</span><div class="meta mono">оборот ${fmt(x.turnover_m,1)}M · funding ${fmt(x.funding,3)}%</div></div>
-    <div class="r mono">${pnl(x.chg24,1)}%${x.chg24>=30?'<span class="badge b-amb">памп</span>':''}</div></div>`).join(''):'<div class="empty">Сканер ещё не запускался</div>';
-  renderJournal();
+  }).join('')||'<div class="empty">Нет описаний</div>';
+  const su=q('stratupd'); if(su) su.textContent=s.strategies_ts?tstr(new Date(s.strategies_ts).getTime()):'';
 }
 
-// ---- equity chart ----
+function renderLab(s){
+  const e1=$('#exps'), e2=$('#scanner');
+  if(e1) e1.innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${esc(e.id||e.file)}</span>
+    <span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${esc(e.mode||'?')}</span>${e.live?'<span class="badge b-long">идёт</span>':'<span class="badge b-mut">остановлен</span>'}</div>
+    <div class="hy">${esc(e.hypothesis||'')}</div><div class="pm mono">${esc(e.strategy||'')} · счёт ${esc(e.account||'')} · риск ${esc(e.risk_pct||'')}% · ${esc(e.start||'')} → ${esc(e.end||'')}</div></div>`).join(''):'<div class="empty">Экспериментов нет</div>';
+  const sc=$('#scants'); if(sc) sc.textContent=s.scanner_ts?tstr(new Date(s.scanner_ts).getTime()):'';
+  if(e2) e2.innerHTML=s.scanner.length?s.scanner.map(x=>`<div class="row"><div class="l"><span class="sym">${x.sym.replace('USDT','')}</span><div class="meta mono">оборот ${fmt(x.turnover_m,1)}M · funding ${fmt(x.funding,3)}%</div></div>
+    <div class="r mono">${pnl(x.chg24,1)}%${x.chg24>=30?'<span class="badge b-amb">памп</span>':''}</div></div>`).join(''):'<div class="empty">Сканер не запускался</div>';
+}
+
+// ---- графики (по индексу страницы) ----
 function prep(cv){const dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return[c,w,h]}
-let eqPts=[];
-function drawEq(){
-  const cv=$('#eqc'); const [c,w,h]=prep(cv); c.clearRect(0,0,w,h);
-  const now=Date.now()/1000; const a=A(),START=a.start||a.equity||1; let ser=a.equity_series.filter(p=>p.t>now-period*86400);
-  if(ser.length<2){ser=a.equity_series.slice(-2)}; if(ser.length<2){ser=[{t:now-3600,v:a.equity},{t:now,v:a.equity}]}
-  const xs=ser.map(p=>p.t), ys=ser.map(p=>p.v); const x0=Math.min(...xs),x1=Math.max(...xs); let y0=Math.min(...ys),y1=Math.max(...ys);
-  if(y1-y0<1){const m=(y0+y1)/2;y0=m-.5;y1=m+.5}; const pad=8;
-  const X=t=>pad+(w-2*pad)*(t-x0)/Math.max(1,x1-x0), Y=v=>h-pad-(h-2*pad-10)*(v-y0)/(y1-y0);
-  eqPts=ser.map(p=>({x:X(p.t),y:Y(p.v),t:p.t,v:p.v}));
-  const up=ys[ys.length-1]>=ys[0]; const col=up?'#2fbf8f':'#e0566b';
+const eqPts={};
+function drawEq(i,a){
+  const cv=document.getElementById('eqc-'+i); if(!cv||!cv.clientWidth) return;
+  const [c,w,h]=prep(cv); c.clearRect(0,0,w,h);
+  const START=a.start||a.equity||1, now=Date.now()/1000, per=period[i]||1;
+  let ser=(a.equity_series||[]).filter(p=>p.t>now-per*86400);
+  if(ser.length<2) ser=(a.equity_series||[]).slice(-2);
+  if(ser.length<2) ser=[{t:now-3600,v:a.equity},{t:now,v:a.equity}];
+  const xs=ser.map(p=>p.t), ys=ser.map(p=>p.v);
+  const x0=Math.min(...xs),x1=Math.max(...xs); let y0=Math.min(...ys,START),y1=Math.max(...ys,START);
+  if(y1-y0<1){const m=(y0+y1)/2;y0=m-.5;y1=m+.5}
+  const pad=8, X=t=>pad+(w-2*pad)*(t-x0)/Math.max(1,x1-x0), Y=v=>h-pad-(h-2*pad-10)*(v-y0)/(y1-y0);
+  eqPts[i]=ser.map(p=>({x:X(p.t),y:Y(p.v),t:p.t,v:p.v}));
+  const col=ys[ys.length-1]>=START?'#2fbf8f':'#e0566b';
   const g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,col+'55'); g.addColorStop(1,col+'00');
-  c.beginPath(); eqPts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)); c.lineTo(eqPts.at(-1).x,h); c.lineTo(eqPts[0].x,h); c.closePath(); c.fillStyle=g; c.fill();
-  c.beginPath(); eqPts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)); c.strokeStyle=col; c.lineWidth=2; c.lineJoin='round'; c.stroke();
-  // start line
+  c.beginPath(); eqPts[i].forEach((p,k)=>k?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)); c.lineTo(eqPts[i].at(-1).x,h); c.lineTo(eqPts[i][0].x,h); c.closePath(); c.fillStyle=g; c.fill();
+  c.beginPath(); eqPts[i].forEach((p,k)=>k?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)); c.strokeStyle=col; c.lineWidth=2; c.lineJoin='round'; c.stroke();
   c.setLineDash([3,4]); c.strokeStyle='#5c5b70'; c.lineWidth=1; c.beginPath(); c.moveTo(0,Y(START)); c.lineTo(w,Y(START)); c.stroke(); c.setLineDash([]);
 }
-function hover(ev){
-  if(!eqPts.length)return; const cv=$('#eqc'),r=cv.getBoundingClientRect(); const px=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
-  let best=eqPts[0]; for(const p of eqPts) if(Math.abs(p.x-px)<Math.abs(best.x-px)) best=p;
-  const [c,w,h]=[cv.getContext('2d'),cv.clientWidth,cv.clientHeight]; drawEq();
-  c.setLineDash([4,4]); c.strokeStyle='#8c8ba0'; c.beginPath(); c.moveTo(best.x,0); c.lineTo(best.x,h); c.stroke(); c.setLineDash([]);
-  c.beginPath(); c.arc(best.x,best.y,4,0,7); c.fillStyle='#ecebf3'; c.fill();
-  const tip=$('#eqtip'); $('#tipd').textContent=tstr(best.t*1000); $('#tipv').textContent=fmt(best.v)+' USDT'; tip.style.opacity=1;
-  const tw=tip.offsetWidth,th=tip.offsetHeight; let tx=best.x-tw/2, ty=best.y-th-10; if(ty<0)ty=best.y+12; tx=Math.max(0,Math.min(w-tw,tx));
-  tip.style.left=tx+'px'; tip.style.top=ty+'px';
-}
-$('#eqc').addEventListener('mousemove',hover); $('#eqc').addEventListener('touchmove',hover,{passive:true});
-$('#eqc').addEventListener('mouseleave',()=>{$('#eqtip').style.opacity=0;drawEq()}); $('#eqc').addEventListener('touchend',()=>{$('#eqtip').style.opacity=0;drawEq()});
-$('#ptabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;period=+b.dataset.p;[...$('#ptabs').children].forEach(x=>x.classList.toggle('on',x===b));drawEq()});
-
-// ---- daily bars ----
-function drawBars(){
-  const days=[]; for(let i=13;i>=0;i--){const d=kyivDay(Date.now()-i*86400000);days.push({d,pnl:(A().daily_pnl.find(x=>x.d===d)||{pnl:0}).pnl})}
-  const mx=Math.max(0.01,...days.map(x=>Math.abs(x.pnl))); const sum=days.reduce((a,x)=>a+x.pnl,0); $('#dsum').innerHTML=pnl(sum)+' за 14д';
-  $('#dbars').innerHTML=`<div class="bars diverge">${days.map((x,i)=>{const hgt=Math.max(2,55*Math.abs(x.pnl)/mx);const left=`left:calc(${i}*(100%/14) + 1.5px);width:calc(100%/14 - 3px)`;return x.pnl>=0?`<div class="bar p" style="${left};height:${x.pnl?hgt:1}px" title="${x.d}: ${fmt(x.pnl)}"></div>`:`<div class="bar n" style="${left};height:${hgt}px" title="${x.d}: ${fmt(x.pnl)}"></div>`}).join('')}</div>
+function drawBars(i,a){
+  const el=document.getElementById('dbars-'+i); if(!el) return;
+  const days=[]; for(let k=13;k>=0;k--){const d=kyivDay(Date.now()-k*86400000);days.push({d,pnl:(a.daily_pnl.find(x=>x.d===d)||{pnl:0}).pnl})}
+  const mx=Math.max(0.01,...days.map(x=>Math.abs(x.pnl))), sum=days.reduce((x,y)=>x+y.pnl,0);
+  const ds=document.getElementById('dsum-'+i); if(ds) ds.innerHTML=pnl(sum)+' за 14д';
+  el.innerHTML=`<div class="bars diverge">${days.map((x,k)=>{const hgt=Math.max(2,55*Math.abs(x.pnl)/mx);const left=`left:calc(${k}*(100%/14) + 1.5px);width:calc(100%/14 - 3px)`;
+    return x.pnl>=0?`<div class="bar p" style="${left};height:${x.pnl?hgt:1}px"></div>`:`<div class="bar n" style="${left};height:${hgt}px"></div>`}).join('')}</div>
   <div class="blabels mono">${days.map(x=>`<span>${x.d.slice(8)}</span>`).join('')}</div>`;
 }
+// период по вкладкам внутри каждой страницы
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[id^="ptabs-"] button'); if(!b) return;
+  const i=+b.closest('[id^="ptabs-"]').id.split('-')[1];
+  period[i]=+b.dataset.p; [...b.parentElement.children].forEach(x=>x.classList.toggle('on',x===b));
+  if(ST) drawEq(i,ST.accounts[i]);
+});
 
-// ---- sparkline ----
-function spark(cv,ser,start,col){ if(!cv)return; const [c,w,h]=prep(cv); c.clearRect(0,0,w,h);
-  let pts=(ser||[]).slice(-120); if(pts.length<2)pts=[{v:start||1},{v:start||1}];
-  const ys=pts.map(p=>p.v); let y0=Math.min(...ys,start||ys[0]),y1=Math.max(...ys,start||ys[0]); if(y1-y0<0.5){const m=(y0+y1)/2;y0=m-.25;y1=m+.25}
-  const X=i=>2+(w-4)*i/(pts.length-1), Y=v=>h-3-(h-6)*(v-y0)/(y1-y0);
-  const d=ys.at(-1)-(start||ys[0]); const lc=Math.abs(d)<0.01?'#8c8ba0':d>0?'#2fbf8f':'#e0566b';
-  const g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,lc+'44'); g.addColorStop(1,lc+'00');
-  c.beginPath(); pts.forEach((p,i)=>i?c.lineTo(X(i),Y(p.v)):c.moveTo(X(i),Y(p.v))); c.lineTo(X(pts.length-1),h); c.lineTo(X(0),h); c.closePath(); c.fillStyle=g; c.fill();
-  c.beginPath(); pts.forEach((p,i)=>i?c.lineTo(X(i),Y(p.v)):c.moveTo(X(i),Y(p.v))); c.strokeStyle=lc; c.lineWidth=1.6; c.lineJoin='round'; c.stroke();
-  if(start){c.setLineDash([2,3]);c.strokeStyle='#5c5b70';c.lineWidth=1;c.beginPath();c.moveTo(0,Y(start));c.lineTo(w,Y(start));c.stroke();c.setLineDash([])}
-}
-// ---- carousel ----
-function selectAcct(i,scroll){ if(i===cur)return; cur=i; localStorage.setItem('acct',cur); render();
-  if(scroll){const el=$('#caro').children[i]; el&&el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
-  const b=$('#acctbody'); b.style.animation='none'; void b.offsetWidth; b.style.animation='in .4s var(--spring)'; }
-$('#caro').addEventListener('click',e=>{const el=e.target.closest('.ac');if(el)selectAcct(+el.dataset.i,true)});
-$('#caro').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const el=e.target.closest('.ac');if(el){e.preventDefault();selectAcct(+el.dataset.i,true)}}});
-let scrollT; $('#caro').addEventListener('scroll',()=>{clearTimeout(scrollT);scrollT=setTimeout(()=>{const c=$('#caro');const i=Math.round(c.scrollLeft/(c.children[0].offsetWidth+8));if(i!==cur&&c.children[i])selectAcct(i,false)},120)},{passive:true});
+// ---- страничная карусель ----
+const pager=$('#pager');
+let scT;
+pager.addEventListener('scroll',()=>{clearTimeout(scT);scT=setTimeout(()=>{
+  const i=Math.round(pager.scrollLeft/pager.clientWidth);
+  if(i!==cur&&ST&&ST.accounts[i]){cur=i;localStorage.setItem('acct',i);
+    $('#pdots').innerHTML=ST.accounts.map((_,k)=>`<i class="${k===cur?'on':''}"></i>`).join('');
+    $('#accttitle').textContent=`${ST.accounts[i].name} · ${ST.accounts[i].role}`;
+    document.documentElement.style.setProperty('--pc',COLORS[i]);
+    drawEq(i,ST.accounts[i]);}
+},90)},{passive:true});
 
 // ================= ЖУРНАЛ СДЕЛОК =================
 const BOTS={E006:{n:'Выкуп пролива',c:'#7132F5',s:'1'},E007:{n:'Выкуп · тень',c:'#9b6bff',s:'1'},
