@@ -43,6 +43,16 @@ main{max-width:480px;margin:0 auto;width:100%;padding:calc(var(--hdr) + env(safe
 .card h2{margin:0 0 12px;font-size:var(--fs-xs);font-weight:var(--fw-s);color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps);display:flex;justify-content:space-between;align-items:center}
 .hero .eq{font-size:var(--fs-display);font-weight:var(--fw-s);letter-spacing:-.02em;line-height:1.1}
 .hero .sub{display:flex;gap:14px;margin-top:8px;font-size:var(--fs-sm);color:var(--muted);flex-wrap:wrap}
+.riskbar{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.rk{flex:1;min-width:88px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 10px;transition:border-color .4s}
+.rk .rkt{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:var(--ls-caps);display:flex;align-items:center;gap:5px}
+.rk .rkd{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.rk .rkv{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:var(--fs-mono);font-weight:var(--fw-s);margin-top:4px}
+.rk.yellow{border-color:color-mix(in srgb,var(--amber) 45%,var(--border))}.rk.yellow .rkd{background:var(--amber)}
+.rk.orange{border-color:color-mix(in srgb,var(--amber) 70%,var(--border))}.rk.orange .rkd{background:#e8802a}
+.rk.red,.rk.daily{border-color:color-mix(in srgb,var(--red) 55%,var(--border));background:color-mix(in srgb,var(--red) 8%,var(--surface2))}
+.rk.red .rkd,.rk.daily .rkd{background:var(--red)}
+.rk .rks{font-size:10px;color:var(--muted);margin-top:3px}
 .livepnl{margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);transition:background .5s,border-color .5s}
 .livepnl.on{background:color-mix(in srgb,var(--lc,var(--muted)) 7%,var(--surface2));border-color:color-mix(in srgb,var(--lc,var(--muted)) 28%,var(--border))}
 .livepnl.pos{--lc:var(--green)}.livepnl.neg{--lc:var(--red)}
@@ -207,6 +217,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
       <div class="lp-val mono" id="upl">—</div>
       <div class="lp-sub" id="lp-sub"></div>
     </div>
+    <div class="riskbar" id="riskbar"></div>
     <div class="tiles">
       <div class="tile"><div class="k">Сегодня</div><div class="v mono" id="t-today">—</div></div>
       <div class="tile"><div class="k">30 дней</div><div class="v mono" id="t-30">—</div></div>
@@ -282,6 +293,7 @@ async function load(){
 
 function render(){
   const s=ST;
+  const esc=x=>String(x==null?'':x).replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');
   $('#errbox').style.display='none';
   $('#killbar').style.display=s.kill?'block':'none';
   $('#botdot').className='dot '+(s.bot_alive?'on':'off'); $('#bottxt').textContent=s.bot_alive?'бот жив':'бот не запущен';
@@ -353,24 +365,31 @@ function render(){
   // lab
   $('#exps').innerHTML=s.experiments.length?s.experiments.map(e=>`<div class="expcard"><div class="h"><span class="sym">${e.id||e.file}</span><span class="badge ${e.mode==='demo'?'b-acc':'b-amb'}">${e.mode||'?'}</span>${e.live?'<span class="badge b-long">идёт</span>':'<span class="badge b-mut">остановлен</span>'}</div>
     <div class="hy">${e.hypothesis||''}</div><div class="pm mono">${e.strategy||''} · ${(e.symbols||[]).join(', ')} · ${e.start||''} → ${e.end||''}</div></div>`).join(''):'<div class="empty">Экспериментов пока нет — конвейер строится</div>';
+  // риск-контроль по экспериментам этого счёта
+  const LVL={green:'норма',yellow:'жёлтый',orange:'оранжевый',red:'СТОП',daily:'дневной стоп'};
+  const myRisk=(s.risk||[]).filter(r=>{const e=(s.experiments||[]).find(x=>x.id===r.exp); return e&&String(e.account)===a.slot&&e.live});
+  $('#riskbar').innerHTML=myRisk.length?myRisk.map(r=>`<div class="rk ${r.level}">
+    <div class="rkt"><span class="rkd"></span>${esc(r.exp)} · ${esc(LVL[r.level]||r.level)}</div>
+    <div class="rkv">−${fmt(r.dd,2)}%</div>
+    <div class="rks">от пика ${fmt(r.peak,0)}${r.consec?' · '+r.consec+' убытка подряд':''}</div></div>`).join(''):'';
+
   // стратегии — описание текущей логики
   const stColor={'основная':'var(--accent)','наблюдение':'var(--amber)','контроль':'var(--faint)'};
-  const esc=x=>String(x==null?'':x).replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');
   $('#strategies').innerHTML=(s.strategies||[]).map(x=>{
     const run=x.running||[]; const c=run.length?(stColor[x.status]||'var(--accent)'):'var(--faint)';
     const blk=(t,v,q)=>v?`<div class="sblock ${q?'quiet':''}"><h4>${t}</h4><p>${esc(v)}</p></div>`:'';
     return `<details class="strat" style="--c:${c}">
       <summary><span class="sdot"></span><span class="shead"><span class="sttl">${esc(x.title||x.name)}</span>
-        ${run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>'}
+        ${x.name==='_risk'?'<span class="badge b-acc">политика</span>':(run.length?'<span class="badge b-long">в работе</span>':'<span class="badge b-mut">не запущена</span>')}
         <div class="stag">${esc(x.tagline||'')}</div></span><span class="schev">⌄</span></summary>
       <div class="sbody"><div class="sin"><div class="spad">
         ${run.length?`<div class="sblock"><h4>Запущено сейчас</h4><div class="srun">${run.map(r=>
           `<span class="rchip"><b>${esc(r.id)}</b> ${esc(r.mode)} · счёт ${esc(r.account)} · риск ${esc(r.risk)}% · ${esc(r.lev)}x</span>`).join('')}</div></div>`:''}
         ${blk('Идея',x.idea)}
-        ${blk('Как вхожу',x.entry)}
-        ${blk('Как выхожу',x.exit)}
-        ${blk('Почему стоп именно такой',x.stop_logic)}
-        ${(x.numbers&&x.numbers.length)?`<div class="sblock"><h4>Проверка на истории</h4><div class="snums">${
+        ${blk(x.name==='_risk'?'Уровни':'Как вхожу',x.entry)}
+        ${blk(x.name==='_risk'?'Дополнительные стопы':'Как выхожу',x.exit)}
+        ${blk(x.name==='_risk'?'Почему такие пороги':'Почему стоп именно такой',x.stop_logic)}
+        ${(x.numbers&&x.numbers.length)?`<div class="sblock"><h4>${x.name==='_risk'?'Цифры':'Проверка на истории'}</h4><div class="snums">${
           x.numbers.map(n=>`<div><span>${esc(n[0])}</span><span>${esc(n[1])}</span></div>`).join('')}</div></div>`:''}
         ${blk('Где риск',x.risk)}
         ${blk('Почему это работает',x.why_it_works,true)}
