@@ -69,6 +69,11 @@ main{width:100%;max-width:480px;margin:0 auto;padding:0}
 .rk.red,.rk.daily{border-color:color-mix(in srgb,var(--red) 55%,var(--border));background:color-mix(in srgb,var(--red) 8%,var(--surface2))}
 .rk.red .rkd,.rk.daily .rkd{background:var(--red)}
 .rk .rks{font-size:10px;color:var(--muted);margin-top:3px}
+.regime{display:flex;align-items:flex-start;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px;font-size:var(--fs-sm);line-height:1.4}
+.regime.wait{border-color:color-mix(in srgb,var(--amber) 40%,var(--border));background:color-mix(in srgb,var(--amber) 7%,var(--surface))}
+.regime .ri{font-size:15px;line-height:1;flex-shrink:0;margin-top:1px}
+.regime b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:var(--ls-caps);color:var(--muted);font-weight:var(--fw-s);margin-bottom:3px}
+.regime .rtxt{color:var(--text)}
 .livepnl{margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);transition:background .5s,border-color .5s}
 .livepnl.on{background:color-mix(in srgb,var(--lc,var(--muted)) 7%,var(--surface2));border-color:color-mix(in srgb,var(--lc,var(--muted)) 28%,var(--border))}
 .livepnl.pos{--lc:var(--green)}.livepnl.neg{--lc:var(--red)}
@@ -462,6 +467,16 @@ function renderPage(a,i,s){
   const lm=q('lockmsg'); if(lm) lm.style.display=a.connected?'none':'block';
   q('equity').textContent=fmt(a.equity)+' USDT';
   q('avail').textContent=fmt(a.available);
+
+  // режим рынка
+  const rg=s.regime||{}, rEl=q('regime');
+  if(rEl){
+    if(rg.ok===false){ rEl.style.display='flex'; rEl.className='regime wait';
+      rEl.innerHTML=`<span class="ri">⏸</span><span><b>Боты ждут</b><span class="rtxt">${esc(rg.reason||'')}</span></span>`; }
+    else if(rg.ok===true){ rEl.style.display='flex'; rEl.className='regime';
+      rEl.innerHTML=`<span class="ri">▶</span><span><b>Режим подходящий</b><span class="rtxt">${esc(rg.reason||'торгуем')}</span></span>`; }
+    else { rEl.style.display='none'; }
+  }
 
   // живая прибыль
   const up=a.unrealised, np=a.positions.length, lp=q('livepnl'), uplEl=q('upl');
