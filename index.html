@@ -206,6 +206,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .tr>summary::-webkit-details-marker{display:none}
 .tr .tsym{font-weight:var(--fw-s);font-size:var(--fs-body)}
 .tr .tmeta{font-size:10px;color:var(--muted);margin-top:3px;display:flex;gap:7px;flex-wrap:wrap}
+.tr .tmeta>span{white-space:nowrap}
 .tr .tright{margin-left:auto;text-align:right;flex-shrink:0}
 .tr .tchev{color:var(--faint);font-size:15px;line-height:1;flex-shrink:0;width:14px;text-align:center;transition:transform .4s var(--spring)}
 .tr[open] .tchev{transform:rotate(180deg)}
@@ -226,7 +227,7 @@ section[data-page]{display:none}section[data-page].on{display:block;animation:in
 .tpath .pt{flex:1;height:4px;background:var(--surface2);position:relative;border-radius:2px}
 .tpath .pt.fill{background:var(--tc,var(--muted))}
 .tpath .lbl{font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--muted);padding:0 6px;white-space:nowrap}
-#jlist{padding-bottom:18px}
+#jlist{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
 .jempty{text-align:center;color:var(--faint);font-size:var(--fs-sm);padding:26px 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -507,13 +508,23 @@ let scrollT; $('#caro').addEventListener('scroll',()=>{clearTimeout(scrollT);scr
 const BOTS={E006:{n:'Выкуп пролива',c:'#7132F5',s:'1'},E007:{n:'Выкуп · тень',c:'#9b6bff',s:'1'},
             E008:{n:'Выкуп · агрессивный',c:'#2fbf8f',s:'3'},E002:{n:'Охота на скам',c:'#e3a63b',s:'2'},
             E001:{n:'Скам · тень',c:'#e3a63b',s:'2'},E003:{n:'Фейд импульса',c:'#8c8ba0',s:'1'}};
-const OUT={'цель':{t:'Цель достигнута',c:'b-long'},'стоп':{t:'Стоп',c:'b-short'},
+const OUT={'цель':{t:'Цель достигнута',c:'b-long'},'стоп':{t:'Стоп',c:'b-short'},'таймер':{t:'По таймеру',c:'b-mut'},
            'выход':{t:'Закрыта в плюс',c:'b-long'},'убыток':{t:'Закрыта в минус',c:'b-short'}};
 let jfilter='all';
 function allTrades(){
   const out=[];
   (ST.accounts||[]).forEach(a=>(a.trades||[]).forEach(t=>out.push({...t,acc:a.name,slot:a.slot})));
   return out.sort((x,y)=>y.closed-x.closed);
+}
+function exitText(t){
+  const held=t.held_min>=60?`${(t.held_min/60).toFixed(1)} ч`:`${Math.round(t.held_min)} мин`;
+  const res=t.pnl>0?`прибыль ${fmt(t.pnl)} USDT`:`убыток ${fmt(Math.abs(t.pnl))} USDT`;
+  if(t.outcome==='цель') return `Цена дошла до цели ${fmt(t.exit,5)} через ${held} — ${res}.`;
+  if(t.outcome==='стоп') return `Сработал стоп на ${fmt(t.exit,5)} через ${held} — ${res}. Движение пошло против входа.`;
+  if(t.outcome==='таймер') return `Вышла по таймеру на ${fmt(t.exit,5)} через ${held} — ${res}. Ни цель, ни стоп не достигнуты.`;
+  if(t.service) return `Служебная проверка механики, не торговый сигнал.`;
+  if(Math.abs(t.pnl)<0.5&&t.held_min<2) return `Закрыта сразу после входа — ${res} (комиссии).`;
+  return `Закрыта по ${t.tp?'таймеру':'команде'} на ${fmt(t.exit,5)} через ${held} — ${res}.`;
 }
 function botOf(t){ return t.service?'service':(t.exp&&BOTS[t.exp]?t.exp:'manual'); }
 function renderJournal(){
@@ -540,7 +551,7 @@ function renderJournal(){
     <div><div class="k">Итог, USDT</div><div class="v ${sgn(pnl)}">${pnl>0?'+':''}${fmt(pnl)}</div></div>
     <div><div class="k">Сделок</div><div class="v">${list.length}</div></div>
     <div><div class="k">Прибыльных</div><div class="v">${list.length?Math.round(100*wins.length/list.length)+'%':'—'}</div></div>
-    <div><div class="k">Профит-фактор</div><div class="v">${pf}</div></div>`;
+    <div><div class="k">П-фактор</div><div class="v">${pf}</div></div>`;
 
   $('#jlist').innerHTML=list.length?list.map(t=>{
     const b=BOTS[t.exp]||{n:t.strategy||'вручную',c:'var(--faint)'};
@@ -565,7 +576,7 @@ function renderJournal(){
           <span class="tsym">${t.sym.replace('USDT','')}</span>
           <span class="badge b-mut">${t.side==='Buy'?'↑ лонг':'↓ шорт'}</span>
           <span class="badge ${o.c}">${esc(o.t)}</span>
-          <div class="tmeta"><span style="color:${b.c}">● ${esc(b.n)}</span><span>закрыта ${tstr(t.closed)}</span><span>${dur}</span></div>
+          <div class="tmeta"><span style="color:var(--muted)"><span style="color:${b.c}">●</span> ${esc(b.n)}</span><span>закрыта ${tstr(t.closed)}</span><span>${dur}</span></div>
         </span>
         <span class="tright">
           <div class="tpnl ${sgn(t.pnl)}">${t.pnl>0?'+':''}${fmt(t.pnl)}<small style="font-size:9px;color:var(--muted);font-weight:400"> USDT</small></div>
@@ -585,7 +596,8 @@ function renderJournal(){
           <div><div class="k">Счёт</div><div class="v">${esc(t.acc)}</div></div>
         </div>
         ${path}
-        ${t.why?`<div class="twhy" style="margin-top:10px"><b>Почему вошла</b>${esc(t.why).replace(/([\d.]+(?:bp|%)?)/g,'<span class="mono" style="color:var(--accent2)">$1</span>')}</div>`:''}
+        <div class="twhy" style="margin-top:10px"><b>Чем закончилась</b>${exitText(t)}</div>
+        ${t.why?`<div class="twhy" style="margin-top:8px"><b>Почему вошла</b>${esc(t.why).replace(/(\d+\.\d+)/g,(m)=>m.replace('.',',')).replace(/(−?[\d,]+(?:bp|%|×[\d,.]+)?)/g,'<span class="mono" style="color:var(--accent2)">$1</span>')}</div>`:''}
       </div></div></div>
     </details>`;
   }).join(''):'<div class="jempty">Сделок пока нет</div>';
